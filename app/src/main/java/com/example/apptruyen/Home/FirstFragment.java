@@ -11,10 +11,6 @@ import com.example.apptruyen.R;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class FirstFragment extends Fragment {
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final com.google.firebase.firestore.CollectionReference
-            mangaCollection = db.collection("Manga");
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
