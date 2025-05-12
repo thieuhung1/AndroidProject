@@ -1,0 +1,154 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/signup_main"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="24dp"
+        android:background="#FFF3E0">
+
+        <!-- Logo -->
+        <ImageView
+            android:id="@+id/logoImageView"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="116dp"
+            android:background="@drawable/edittext_background"
+            android:contentDescription="App Logo"
+            android:src="@drawable/logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đăng ký tài khoản"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/purple_200"
+            app:layout_constraintTop_toBottomOf="@id/logoImageView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <!-- Tên người dùng -->
+        <EditText
+            android:id="@+id/usernameEditText"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:hint="Tên người dùng"
+            android:inputType="textPersonName"
+            android:background="@drawable/edittext_background"
+            android:paddingHorizontal="16dp"
+            android:textColorHint="#888888"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/titleTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="32dp" />
+
+        <!-- Email -->
+        <EditText
+            android:id="@+id/emailEditText"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:background="@drawable/edittext_background"
+            android:paddingHorizontal="16dp"
+            android:textColorHint="#888888"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/usernameEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <!-- Mật khẩu -->
+        <EditText
+            android:id="@+id/passwordEditText"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:hint="Mật khẩu"
+            android:textColor="@color/black"
+            android:inputType="textPassword"
+            android:background="@drawable/edittext_background"
+            android:paddingHorizontal="16dp"
+            android:textColorHint="#888888"
+            app:layout_constraintTop_toBottomOf="@id/emailEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <ImageView
+            android:id="@+id/passwordToggle"
+            android:layout_width="21dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/eye_open"
+            app:layout_constraintEnd_toEndOf="@id/passwordEditText"
+            app:layout_constraintTop_toBottomOf="@id/emailEditText" />
+
+        <!-- Nhập lại mật khẩu -->
+        <EditText
+            android:id="@+id/confirmPasswordEditText"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:hint="Nhập lại mật khẩu"
+            android:textColor="@color/black"
+            android:inputType="textPassword"
+            android:background="@drawable/edittext_background"
+            android:paddingHorizontal="16dp"
+            android:textColorHint="#888888"
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp" />
+
+        <ImageView
+            android:id="@+id/confirmToggle"
+            android:layout_width="21dp"
+            android:layout_height="25dp"
+            android:layout_marginTop="28dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/eye_open"
+            app:layout_constraintEnd_toEndOf="@id/confirmPasswordEditText"
+            app:layout_constraintTop_toBottomOf="@id/passwordEditText" />
+
+        <!-- Nút đăng ký -->
+        <Button
+            android:id="@+id/signupButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="Đăng ký"
+            android:background="@drawable/button_background"
+            android:backgroundTint="@color/purple_200"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toBottomOf="@id/confirmPasswordEditText"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="24dp" />
+
+        <!-- Nút đăng nhập -->
+        <TextView
+            android:id="@+id/Loginview1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Đã có tài khoản đăng nhập?"
+            android:textColor="@color/purple_200"
+            android:textStyle="italic"
+            app:layout_constraintTop_toBottomOf="@id/signupButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
