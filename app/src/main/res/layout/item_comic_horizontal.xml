@@ -16,9 +16,9 @@
             android:id="@+id/imageViewComicCover"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:contentDescription="Bìa truyện"
             android:scaleType="centerCrop"
-            android:src="@drawable/bannerp"
-            android:contentDescription="Bìa truyện"/>
+            android:src="@drawable/bannerp" />
     </androidx.cardview.widget.CardView>
 
     <TextView
