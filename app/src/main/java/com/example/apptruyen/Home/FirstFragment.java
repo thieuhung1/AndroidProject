@@ -29,7 +29,7 @@ import java.util.List;
 
 public class FirstFragment extends Fragment {
 
-    private RecyclerView recyclerView;
+    private RecyclerView recyclerView;k
     private ComicAdapter adapter;
     private List<Comic> comicList = new ArrayList<>();
     private void uploadComicsToFirestore(List<Comic> comics) {
