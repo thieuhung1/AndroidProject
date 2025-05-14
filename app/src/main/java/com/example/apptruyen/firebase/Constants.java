@@ -6,21 +6,21 @@ public class Constants {
     public static final String KEY_NAME = "name";
     public static final String KEY_EMAIL = "email";
     public static final String KEY_PASSWORD = "password";
-    //Manga
-    public static final String MANGA_COLLECTION = "Manga";
-    public static final String CHAPTERS_SUBCOLLECTION = "chapters";
-    public static final String KEY_Category = "category";
-
-    public static final String KEY_THUMB = "thumbUrl";
-    public static final String KEY_NAME_MANGA = "name";
+    //comic
+    public static final String KEY_COLLECTION_COMICS = "comics";
+    public static final String KEY_NAME_COMIC = "name";
+    public static final String KEY_SLUG = "slug";
+    public static final String KEY_ORIGIN_NAME = "origin_name";
     public static final String KEY_STATUS = "status";
-    //
-    public static final String KEY_COLLECTION_CATEGORIES = "categories";
-    public static final String KEY_ID = "id";
-    public static final String KEY_NAME_CATEGORY = "name";
-    //
+    public static final String KEY_THUMB_URL = "thumb_url";
+    public static final String KEY_UPDATED_AT = "updatedAt";
+    public static final String KEY_CATEGORY = "category";
+    public static final String KEY_LATEST_CHAPTER = "latest_chapter";
+    // chapter
     public static final String KEY_COLLECTION_CHAPTERS = "chapters";
-    public static final String KEY_CHAPTER_NAME = "chapterName";
-    public static final String KEY_CHAPTER_API_URL = "chapterApiUrl";
+    public static final String KEY_FILENAME = "filename";
+    public static final String KEY_CHAPTER_NAME = "chapter_name";
+    public static final String KEY_CHAPTER_TITLE = "chapter_title";
+    public static final String KEY_CHAPTER_API_DATA = "chapter_api_data";
 
 }
