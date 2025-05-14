@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.apptruyen.R;
 import com.example.apptruyen.model.Comic;
 
+
 import java.util.List;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHolder> {
@@ -32,16 +33,28 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         View view = LayoutInflater.from(context).inflate(R.layout.item_comic_vertical, parent, false);
         return new ComicViewHolder(view);
     }
-
     @Override
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
         Comic comic = comics.get(position);
         holder.textName.setText(comic.name);
         holder.textStatus.setText(comic.status);
 
-        String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;
+        // ✅ Load ảnh ONLINE:
+        String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;;
         Glide.with(context).load(imageUrl).into(holder.imageThumb);
+
+        // ✅ Nếu muốn test ảnh LOCAL:
+        // holder.imageThumb.setImageResource(R.drawable.test_image);
     }
+//    @Override
+//    public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
+//        Comic comic = comics.get(position);
+//        holder.textName.setText(comic.name);
+//        holder.textStatus.setText(comic.status);
+//
+//        String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;
+//        Glide.with(context).load(imageUrl).into(holder.imageThumb);
+//    }
 
     @Override
     public int getItemCount() {

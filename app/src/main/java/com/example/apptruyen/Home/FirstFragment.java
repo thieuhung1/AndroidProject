@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.apptruyen.R;
 import com.example.apptruyen.firebase.ComicAdapter;
 import com.example.apptruyen.model.Comic;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -30,14 +32,27 @@ public class FirstFragment extends Fragment {
     private RecyclerView recyclerView;
     private ComicAdapter adapter;
     private List<Comic> comicList = new ArrayList<>();
+    private void uploadComicsToFirestore(List<Comic> comics) {
+        FirebaseApp.initializeApp(requireContext()); // ✅ Gọi đúng trong Fragment
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        for (Comic comic : comics) {
+            db.collection("comics")
+                    .document(comic.id) // sử dụng _id làm document ID
+                    .set(comic)
+                    .addOnSuccessListener(aVoid ->
+                            Log.d("FIRESTORE", "✅ Đã upload: " + comic.name))
+                    .addOnFailureListener(e ->
+                            Log.e("FIRESTORE", "❌ Lỗi khi upload: " + comic.name, e));
+        }
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_first, container, false);
-
         recyclerView = view.findViewById(R.id.newUpdatesRecycler);
-        recyclerView = view.findViewById(R.id.popularRecycler);
+
         
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ComicAdapter(getContext(), comicList);
@@ -84,15 +99,21 @@ public class FirstFragment extends Fragment {
                     chap.chapter_title = chapObj.optString("chapter_title");
                     chap.chapter_api_data = chapObj.optString("chapter_api_data");
                     comic.latest_chapter = chap;
+
                 }
 
                 comicList.add(comic);
+
             }
 
             adapter.notifyDataSetChanged();
+            uploadComicsToFirestore(comicList);
 
         } catch (Exception e) {
             Log.e("JSON_ERROR", "Lỗi khi load comics", e);
         }
+
+
+
     }
 }

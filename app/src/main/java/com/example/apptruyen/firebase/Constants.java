@@ -1,5 +1,6 @@
 package com.example.apptruyen.firebase;
-
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 public class Constants {
     //user
     public static final String KEY_COLLECTION_USERS = "users";
