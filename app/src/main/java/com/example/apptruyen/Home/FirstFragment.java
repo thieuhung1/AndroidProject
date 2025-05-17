@@ -73,6 +73,7 @@ public class FirstFragment extends Fragment {
             String json = new String(buffer, StandardCharsets.UTF_8);
             JSONObject root = new JSONObject(json);
             JSONArray items = root.getJSONObject("data").getJSONArray("items");
+            int limit = Math.min(items.length(), 3);
 
             for (int i = 0; i < items.length(); i++) {
                 JSONObject obj = items.getJSONObject(i);
