@@ -14,8 +14,7 @@
         <ImageView
             android:id="@+id/detailThumb"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:adjustViewBounds="true"
+            android:layout_height="300dp"
             android:scaleType="centerCrop"
             android:contentDescription="Thumb" />
 
@@ -53,7 +52,6 @@
             android:id="@+id/chapterRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
             android:layout_marginTop="8dp" />
     </LinearLayout>
 </ScrollView>
