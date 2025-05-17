@@ -1,8 +1,9 @@
 package com.example.apptruyen.model;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Comic {
+public class Comic implements Serializable {
     public String id;
     public String name;
     public String slug;
@@ -13,7 +14,7 @@ public class Comic {
     public List<String> category;
     public Chapter latest_chapter;
 
-    public static class Chapter {
+    public static class Chapter implements Serializable {
         public String filename;
         public String chapter_name;
         public String chapter_title;

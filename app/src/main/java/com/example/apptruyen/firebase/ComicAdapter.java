@@ -1,6 +1,7 @@
 package com.example.apptruyen.firebase;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.apptruyen.Home.ComicDetailActivity;
 import com.example.apptruyen.R;
 import com.example.apptruyen.model.Comic;
 
@@ -32,6 +34,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
     public ComicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_comic_vertical, parent, false);
         return new ComicViewHolder(view);
+
     }
     @Override
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
@@ -39,14 +42,18 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
         holder.textName.setText(comic.name);
         holder.textStatus.setText(comic.status);
 
-        // ✅ Load ảnh ONLINE:
-        String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;;
+        String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;
         Glide.with(context).load(imageUrl).into(holder.imageThumb);
 
-        // ✅ Nếu muốn test ảnh LOCAL:
-        // holder.imageThumb.setImageResource(R.drawable.test_image);
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ComicDetailActivity.class);
+            intent.putExtra("comic", comic);
+            context.startActivity(intent);
+        });
     }
-//    @Override
+
+
+    //    @Override
 //    public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
 //        Comic comic = comics.get(position);
 //        holder.textName.setText(comic.name);
@@ -55,7 +62,6 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 //        String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;
 //        Glide.with(context).load(imageUrl).into(holder.imageThumb);
 //    }
-
     @Override
     public int getItemCount() {
         return comics.size();
