@@ -23,5 +23,13 @@ public class Constants {
     public static final String KEY_CHAPTER_NAME = "chapter_name";
     public static final String KEY_CHAPTER_TITLE = "chapter_title";
     public static final String KEY_CHAPTER_API_DATA = "chapter_api_data";
+    public static final String KEY_CHAPTER_ID = "chapter_id";
+    //chapter content
+    public static final String KEY_COLLECTION_CHAPTER_CONTENT = "chapter_content";
+    public static final String KEY_PAGE_URLS = "page_urls";
+    public static final String KEY_CHAPTER_CONTENT = "chapter_name";
+    public static final String KEY_NEXT_CHAPTER_ID = "next_chapter_id";
+    public static final String KEY_PREV_CHAPTER_ID = "prev_chapter_id";
+
 
 }

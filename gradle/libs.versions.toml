@@ -14,6 +14,7 @@ credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
 firebaseFirestore = "25.1.4"
 navigationFragment = "2.9.0"
+firebaseDatabase = "21.0.0"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -30,6 +31,7 @@ credentials-play-services-auth = { group = "androidx.credentials", name = "crede
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+firebase-database = { group = "com.google.firebase", name = "firebase-database", version.ref = "firebaseDatabase" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

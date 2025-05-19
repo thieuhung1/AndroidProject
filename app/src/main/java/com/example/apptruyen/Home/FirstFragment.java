@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-
 import com.example.apptruyen.R;
 import com.example.apptruyen.firebase.ComicAdapter;
 import com.example.apptruyen.model.Comic;
@@ -32,13 +31,14 @@ public class FirstFragment extends Fragment {
     private RecyclerView recyclerView;
     private ComicAdapter adapter;
     private List<Comic> comicList = new ArrayList<>();
+
     private void uploadComicsToFirestore(List<Comic> comics) {
-        FirebaseApp.initializeApp(requireContext()); // ✅ Gọi đúng trong Fragment
+        FirebaseApp.initializeApp(requireContext());
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         for (Comic comic : comics) {
             db.collection("comics")
-                    .document(comic.id) // sử dụng _id làm document ID
+                    .document(comic._id)
                     .set(comic)
                     .addOnSuccessListener(aVoid ->
                             Log.d("FIRESTORE", "✅ Đã upload: " + comic.name))
@@ -53,7 +53,6 @@ public class FirstFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_first, container, false);
         recyclerView = view.findViewById(R.id.newUpdatesRecycler);
 
-        
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new ComicAdapter(getContext(), comicList);
         recyclerView.setAdapter(adapter);
@@ -73,13 +72,13 @@ public class FirstFragment extends Fragment {
             String json = new String(buffer, StandardCharsets.UTF_8);
             JSONObject root = new JSONObject(json);
             JSONArray items = root.getJSONObject("data").getJSONArray("items");
-            int limit = Math.min(items.length(), 3);
 
             for (int i = 0; i < items.length(); i++) {
                 JSONObject obj = items.getJSONObject(i);
                 Comic comic = new Comic();
-                comic.id = obj.getString("_id");
-                comic.name = obj.getString("name");
+
+                comic._id = obj.getString("_id");
+                comic.name = obj.getString("name"); // ✅ Sửa lỗi chỗ này
                 comic.slug = obj.getString("slug");
                 comic.origin_name = obj.getJSONArray("origin_name").join(",").replace("\"", "");
                 comic.status = obj.getString("status");
@@ -100,21 +99,17 @@ public class FirstFragment extends Fragment {
                     chap.chapter_title = chapObj.optString("chapter_title");
                     chap.chapter_api_data = chapObj.optString("chapter_api_data");
                     comic.latest_chapter = chap;
-
                 }
 
+                Log.d("COMIC_JSON", "✅ Đã load: " + comic.name);
                 comicList.add(comic);
-
             }
 
             adapter.notifyDataSetChanged();
             uploadComicsToFirestore(comicList);
 
         } catch (Exception e) {
-            Log.e("JSON_ERROR", "Lỗi khi load comics", e);
+            Log.e("JSON_ERROR", "❌ Lỗi khi load comics từ JSON", e);
         }
-
-
-
     }
 }

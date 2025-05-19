@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.apptruyen.Home.ComicDetailActivity;
+import com.example.apptruyen.Home.ChapterDetail;
 import com.example.apptruyen.R;
 import com.example.apptruyen.model.Comic;
 
@@ -44,7 +44,7 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
         try {
             Comic comic = comics.get(position);
-            holder.textName.setText(comic.name);
+            holder.textName.setText(comic.name+comic._id );
             holder.textStatus.setText(comic.status);
 
             // Cải thiện cách load hình ảnh với Glide
@@ -61,8 +61,9 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
             holder.itemView.setOnClickListener(v -> {
                 try {
-                    Intent intent = new Intent(context, ComicDetailActivity.class);
-                    intent.putExtra("comic", comic);
+                    Intent intent = new Intent(context, ChapterDetail.class);
+                    intent.putExtra("comicId", comic._id);
+                    intent.putExtra("slug", comic.slug);// Truyền ID thay vì cả object
                     context.startActivity(intent);
                 } catch (Exception e) {
                     Log.e(TAG, "Error opening comic details", e);

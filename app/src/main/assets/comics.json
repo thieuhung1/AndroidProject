@@ -3,61 +3,46 @@
   "message": "",
   "data": {
     "seoOnPage": {
-      "og_type": "website",
       "titleHead": "Dữ liệu truyện tranh miễn phí mới nhất. Cập nhật nhanh chóng, chất lượng cao hình ảnh sắc nét",
       "descriptionHead": "Website cung cấp truyện tranh miễn phí nhanh chất lượng cao. Nguồn truyện tranh chất lượng cao cập nhật nhanh nhất. API truyện tranh, Data truyện tranh miễn phí",
+      "og_type": "website",
       "og_image": [
-        "/uploads/comics/nguoi-choi-he-tu-la-thumb.jpg",
-        "/uploads/comics/nguoi-choi-cap-toi-da-thumb.jpg",
-        "/uploads/comics/ngoi-nha-an-ngay-tan-the-thumb.jpg",
+        "/uploads/comics/nguoi-giu-cua-van-gioi-thumb.jpg",
+        "/uploads/comics/ngay-tan-the-da-den-thumb.jpg",
+        "/uploads/comics/nga-lao-ma-than-thumb.jpg",
         "/uploads/comics/nam-chu-vi-sao-quyen-ru-ta-thumb.jpg",
-        "/uploads/comics/miyeon-thumb.jpg",
-        "/uploads/comics/mat-nhat-thien-ha-ta-virus-quan-vuong-thumb.jpg",
-        "/uploads/comics/ma-thu-vay-ma-co-y-do-bat-chinh-voi-ta-thumb.jpg",
+        "/uploads/comics/moi-cong-tu-tram-yeu-thumb.jpg",
+        "/uploads/comics/ma-chien-si-thumb.jpg",
+        "/uploads/comics/lua-hon-thumb.jpg",
         "/uploads/comics/loser-gioi-vo-thumb.jpg",
-        "/uploads/comics/level-up-chi-bang-cach-an-com-thumb.jpg",
-        "/uploads/comics/ky-niem-tuoi-19-toi-te-thumb.jpg",
-        "/uploads/comics/kiep-nay-toi-nhat-dinh-tro-thanh-gia-chu-thumb.jpg",
-        "/uploads/comics/khu-rung-hoang-da-thumb.jpg",
-        "/uploads/comics/ke-hoach-nghi-huu-cua-nhan-vat-phan-dien-thumb.jpg",
-        "/uploads/comics/i-found-a-female-knight-in-a-rice-field-in-the-countryside-they-think-shes-my-wife-thumb.jpg",
-        "/uploads/comics/hoc-vien-toi-thuong-thumb.jpg",
-        "/uploads/comics/hoan-doi-dieu-ky-thumb.jpg",
+        "/uploads/comics/long-vuong-truyen-thuyet-thumb.jpg",
+        "/uploads/comics/kuroiwa-medaka-ni-watashi-no-kawaii-ga-tsuujinai-thumb.jpg",
+        "/uploads/comics/khi-toi-xuyen-vao-gia-dinh-toan-phan-dien-thumb.jpg",
+        "/uploads/comics/ket-thuc-co-hau-cho-nhan-vat-phan-dien-tre-tuoi-thumb.jpg",
         "/uploads/comics/hoa-ra-ta-da-vo-dich-tu-lau-thumb.jpg",
-        "/uploads/comics/ho-den-choi-nha-thumb.jpg",
-        "/uploads/comics/hen-ho-cung-hac-thuat-su-thumb.jpg",
-        "/uploads/comics/han-bang-vo-gia-thumb.jpg",
-        "/uploads/comics/hades-va-persephone-thumb.jpg",
-        "/uploads/comics/hac-ki-si-thien-tai-gioi-han-thoi-gian-thumb.jpg",
-        "/uploads/comics/goi-ta-la-quy-sai-dai-nhan-thumb.jpg",
-        "/uploads/comics/every-day-in-a-vampire-family-thumb.jpg"
-      ],
-      "og_url": "danh-sach/truyen-moi"
+        "/uploads/comics/hiep-khach-hanh-bat-thong-thumb.jpg",
+        "/uploads/comics/hai-vuong-sau-khi-hoan-luong-sa-vao-tu-la-trang-thumb.jpg",
+        "/uploads/comics/gia-vo-lam-phe-vat-hoc-duong-thumb.jpg",
+        "/uploads/comics/gia-dinh-diep-vien-thumb.jpg",
+        "/uploads/comics/dong-tien-kham-the-thumb.jpg",
+        "/uploads/comics/doi-ta-hoan-toan-trai-nguoc-thumb.jpg",
+        "/uploads/comics/doc-co-tu-linh-su-thumb.jpg",
+        "/uploads/comics/do-thi-cuc-pham-y-than-thumb.jpg",
+        "/uploads/comics/do-thi-bat-yeu-nhan-thumb.jpg",
+        "/uploads/comics/do-long-thumb.jpg",
+        "/uploads/comics/de-nhat-vo-su-baek-cao-thu-thumb.jpg"
+      ]
     },
-    "breadCrumb": [
-      {
-        "name": "Truyện Mới",
-        "slug": "/danh-sach/truyen-moi",
-        "isCurrent": false,
-        "position": 2
-      },
-      {
-        "name": "Trang 1",
-        "isCurrent": true,
-        "position": 3
-      }
-    ],
-    "titlePage": "Truyện Mới",
     "items": [
       {
-        "_id": "6780f713a4a4a602fb814072",
-        "name": "Người Chơi Hệ Tu La",
-        "slug": "nguoi-choi-he-tu-la",
+        "_id": "6780f717a4a4a602fb814075",
+        "name": "Người Giữ Cửa Vạn Giới",
+        "slug": "nguoi-giu-cua-van-gioi",
         "origin_name": [
-          "Người Chơi Hệ Tu La"
+          "Người Giữ Cửa Vạn Giới"
         ],
         "status": "ongoing",
-        "thumb_url": "nguoi-choi-he-tu-la-thumb.jpg",
+        "thumb_url": "nguoi-giu-cua-van-gioi-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -66,25 +51,52 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:56:34.697Z",
+        "updatedAt": "2025-05-18T04:17:00.727Z",
         "chaptersLatest": [
           {
-            "filename": "Người Chơi Hệ Tu La [Chap 38-43]",
-            "chapter_name": "43",
+            "filename": "Người Giữ Cửa Vạn Giới [Chap 49-50]",
+            "chapter_name": "50",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bf8c705a578a7fd8293"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295dc7c705a578a7fdac1a"
           }
         ]
       },
       {
-        "_id": "65864f8810dc9c0a7e2e127b",
-        "name": "Người Chơi Cấp Tối Đa",
-        "slug": "nguoi-choi-cap-toi-da",
+        "_id": "6807ad80911ae532d4a07db7",
+        "name": "Ngày Tận Thế Đã Đến",
+        "slug": "ngay-tan-the-da-den",
         "origin_name": [
-          "Người Chơi Đỉnh Cấp"
+          "Ngày Tận Thế Đã Đến"
         ],
         "status": "ongoing",
-        "thumb_url": "nguoi-choi-cap-toi-da-thumb.jpg",
+        "thumb_url": "ngay-tan-the-da-den-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:16:41.687Z",
+        "chaptersLatest": [
+          {
+            "filename": "Ngày Tận Thế Đã Đến [Chap 10-12]",
+            "chapter_name": "12",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295dc4c705a578a7fdac11"
+          }
+        ]
+      },
+      {
+        "_id": "6591220d68e54cf5b509145f",
+        "name": "Ngã lão ma thần",
+        "slug": "nga-lao-ma-than",
+        "origin_name": [
+          "Nano Ma Thần"
+        ],
+        "status": "ongoing",
+        "thumb_url": "nga-lao-ma-than-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -98,45 +110,28 @@
             "slug": "manhwa"
           },
           {
+            "id": "6508654905d5791ad671a4dc",
+            "name": "Martial Arts",
+            "slug": "martial-arts"
+          },
+          {
+            "id": "6508654a05d5791ad671a504",
+            "name": "Supernatural",
+            "slug": "supernatural"
+          },
+          {
             "id": "6508654a05d5791ad671a510",
             "name": "Truyện Màu",
             "slug": "truyen-mau"
           }
         ],
-        "updatedAt": "2025-05-11T03:56:18.288Z",
+        "updatedAt": "2025-05-18T04:16:29.434Z",
         "chaptersLatest": [
           {
-            "filename": "Người Chơi Cấp Tối Đa [Chap 82-91]",
-            "chapter_name": "91",
+            "filename": "Ngã Lão Ma Thần [Chap 260]",
+            "chapter_name": "260",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bf5c705a578a7fd8281"
-          }
-        ]
-      },
-      {
-        "_id": "665eeb3a3364635cf556a663",
-        "name": "Ngôi Nhà Ẩn Ngày Tận Thế",
-        "slug": "ngoi-nha-an-ngay-tan-the",
-        "origin_name": [
-          ""
-        ],
-        "status": "ongoing",
-        "thumb_url": "ngoi-nha-an-ngay-tan-the-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a491",
-            "name": "Action",
-            "slug": "action"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:56:01.813Z",
-        "chaptersLatest": [
-          {
-            "filename": "Ngôi Nhà Ẩn Ngày Tận Thế [Chap 42-46]",
-            "chapter_name": "46",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bdec705a578a7fd8265"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295db7c705a578a7fdabea"
           }
         ]
       },
@@ -157,25 +152,25 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:55:47.610Z",
+        "updatedAt": "2025-05-18T04:16:15.044Z",
         "chaptersLatest": [
           {
-            "filename": "Nam Chủ Vì Sao Quyến Rũ Ta [Chap 55]",
-            "chapter_name": "55",
+            "filename": "Nam Chủ Vì Sao Quyến Rũ Ta [Chap 56]",
+            "chapter_name": "56",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bd0c705a578a7fd8256"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295db5c705a578a7fdabe4"
           }
         ]
       },
       {
-        "_id": "67f9f95333fa3efa41c19bad",
-        "name": "Miyeon",
-        "slug": "miyeon",
+        "_id": "67eb24419ef8dcdadf6e27a1",
+        "name": "Mời Công Tử Trảm Yêu",
+        "slug": "moi-cong-tu-tram-yeu",
         "origin_name": [
-          "Miyeon"
+          "Mời Công Tử Trảm Yêu"
         ],
         "status": "ongoing",
-        "thumb_url": "miyeon-thumb.jpg",
+        "thumb_url": "moi-cong-tu-tram-yeu-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -184,77 +179,52 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:55:31.296Z",
+        "updatedAt": "2025-05-18T04:16:00.246Z",
         "chaptersLatest": [
           {
-            "filename": "Miyeon [Chap 11]",
-            "chapter_name": "11",
+            "filename": "Mời Công Tử Trảm Yêu [Chap 180-182]",
+            "chapter_name": "182",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bf9c926626890a95928"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295db3c705a578a7fdabe0"
           }
         ]
       },
       {
-        "_id": "65f3f88266b83f07110d50cf",
-        "name": "Mạt Nhật Thiên Hạ: Ta, Virus Quân Vương",
-        "slug": "mat-nhat-thien-ha-ta-virus-quan-vuong",
+        "_id": "6815ad4e911ae532d4a47ace",
+        "name": "Ma Chiến Sĩ",
+        "slug": "ma-chien-si",
         "origin_name": [
           ""
         ],
         "status": "ongoing",
-        "thumb_url": "mat-nhat-thien-ha-ta-virus-quan-vuong-thumb.jpg",
+        "thumb_url": "ma-chien-si-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
             "id": "6508654905d5791ad671a491",
             "name": "Action",
             "slug": "action"
-          },
-          {
-            "id": "6508654905d5791ad671a4a6",
-            "name": "Adventure",
-            "slug": "adventure"
-          },
-          {
-            "id": "6508654905d5791ad671a4c7",
-            "name": "Fantasy",
-            "slug": "fantasy"
-          },
-          {
-            "id": "6508654905d5791ad671a4d8",
-            "name": "Manhua",
-            "slug": "manhua"
-          },
-          {
-            "id": "6508654a05d5791ad671a510",
-            "name": "Truyện Màu",
-            "slug": "truyen-mau"
-          },
-          {
-            "id": "6508654a05d5791ad671a514",
-            "name": "Webtoon",
-            "slug": "webtoon"
           }
         ],
-        "updatedAt": "2025-05-11T03:55:21.534Z",
+        "updatedAt": "2025-05-18T04:15:43.436Z",
         "chaptersLatest": [
           {
-            "filename": "Mạt Nhật Thiên Hạ Ta Virus Quân Vương [Chap 64]",
-            "chapter_name": "64",
+            "filename": "Ma Chiến Sĩ [Chap 20-21]",
+            "chapter_name": "21",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bc8c705a578a7fd824f"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295e03c926626890a98417"
           }
         ]
       },
       {
-        "_id": "6778e70c9ef8dcdadf5db78d",
-        "name": "Ma Thú Vậy Mà Có Ý Đồ Bất Chính Với Ta",
-        "slug": "ma-thu-vay-ma-co-y-do-bat-chinh-voi-ta",
+        "_id": "6807ad22911ae532d4a07d28",
+        "name": "Lửa Hồn",
+        "slug": "lua-hon",
         "origin_name": [
-          "Ma Thú Vậy Mà Có Ý Đồ Bất Chính Với Ta"
+          "Lửa Hồn"
         ],
         "status": "ongoing",
-        "thumb_url": "ma-thu-vay-ma-co-y-do-bat-chinh-voi-ta-thumb.jpg",
+        "thumb_url": "lua-hon-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -263,13 +233,13 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:55:11.281Z",
+        "updatedAt": "2025-05-18T04:15:32.837Z",
         "chaptersLatest": [
           {
-            "filename": "Ma Thú Vậy Mà Có Ý Đồ Bất Chính Với Ta [Chap 31-35]",
-            "chapter_name": "35",
+            "filename": "Lửa Hồn [Chap 1-17]",
+            "chapter_name": "17",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bc7c705a578a7fd824b"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295daac705a578a7fdabd1"
           }
         ]
       },
@@ -315,25 +285,25 @@
             "slug": "webtoon"
           }
         ],
-        "updatedAt": "2025-05-11T03:54:57.351Z",
+        "updatedAt": "2025-05-18T04:15:21.297Z",
         "chaptersLatest": [
           {
-            "filename": "Loser Giỏi Võ [Chap 116-120]",
-            "chapter_name": "120",
+            "filename": "Loser Giỏi Võ [Chap 121]",
+            "chapter_name": "121",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bbfc705a578a7fd8238"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d91c705a578a7fdab9b"
           }
         ]
       },
       {
-        "_id": "658a44d010dc9c0a7e2e2bf5",
-        "name": "Level Up Chỉ Bằng Cách Ăn Cơm",
-        "slug": "level-up-chi-bang-cach-an-com",
+        "_id": "6583abc668e54cf5b508babc",
+        "name": "Long Vương Truyền Thuyết",
+        "slug": "long-vuong-truyen-thuyet",
         "origin_name": [
-          "Tôi Lên Cấp Chỉ Bằng Cách Ăn"
+          "Đấu La Đại Lục 3"
         ],
         "status": "ongoing",
-        "thumb_url": "level-up-chi-bang-cach-an-com-thumb.jpg",
+        "thumb_url": "long-vuong-truyen-thuyet-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -352,9 +322,19 @@
             "slug": "fantasy"
           },
           {
-            "id": "6508654905d5791ad671a4da",
-            "name": "Manhwa",
-            "slug": "manhwa"
+            "id": "6508654905d5791ad671a4d8",
+            "name": "Manhua",
+            "slug": "manhua"
+          },
+          {
+            "id": "6508654905d5791ad671a4dc",
+            "name": "Martial Arts",
+            "slug": "martial-arts"
+          },
+          {
+            "id": "6508654905d5791ad671a4f6",
+            "name": "Shounen",
+            "slug": "shounen"
           },
           {
             "id": "6508654a05d5791ad671a510",
@@ -362,75 +342,36 @@
             "slug": "truyen-mau"
           }
         ],
-        "updatedAt": "2025-05-11T03:54:38.480Z",
+        "updatedAt": "2025-05-18T04:15:11.092Z",
         "chaptersLatest": [
           {
-            "filename": "Level Up Chỉ Bằng Cách Ăn Cơm [Chap 198-200]",
-            "chapter_name": "200",
+            "filename": "Long Vương Truyền Thuyết [Chap 436]",
+            "chapter_name": "436",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ba7c926626890a958c5"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d8cc705a578a7fdab95"
           }
         ]
       },
       {
-        "_id": "676fa5449ef8dcdadf5c35ab",
-        "name": "Kỷ Niệm Tuổi 19 Tồi Tệ",
-        "slug": "ky-niem-tuoi-19-toi-te",
+        "_id": "658e779e68e54cf5b508ff26",
+        "name": "Kuroiwa Medaka Ni Watashi No Kawaii Ga Tsuujinai",
+        "slug": "kuroiwa-medaka-ni-watashi-no-kawaii-ga-tsuujinai",
         "origin_name": [
-          "Kỷ Niệm Tuổi 19 Tồi Tệ"
+          ""
         ],
-        "status": "ongoing",
-        "thumb_url": "ky-niem-tuoi-19-toi-te-thumb.jpg",
+        "status": "coming_soon",
+        "thumb_url": "kuroiwa-medaka-ni-watashi-no-kawaii-ga-tsuujinai-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
-            "id": "6508654905d5791ad671a491",
-            "name": "Action",
-            "slug": "action"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:54:20.907Z",
-        "chaptersLatest": [
-          {
-            "filename": "Kỷ Niệm Tuổi 19 Tồi Tệ [Chap 32]",
-            "chapter_name": "32",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201b9bc926626890a958ba"
-          }
-        ]
-      },
-      {
-        "_id": "65864f4c10dc9c0a7e2e120d",
-        "name": "Kiếp này tôi nhất định trở thành gia chủ!",
-        "slug": "kiep-nay-toi-nhat-dinh-tro-thanh-gia-chu",
-        "origin_name": [
-          "Kiếp Này Tôi Sẽ Trở Thành Gia Chủ",
-          "Kiếp Này Nhất Định Làm Đại Boss Trong Nhà",
-          "In This Life I Will Be The Lord"
-        ],
-        "status": "ongoing",
-        "thumb_url": "kiep-nay-toi-nhat-dinh-tro-thanh-gia-chu-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a4ac",
-            "name": "Chuyển Sinh",
-            "slug": "chuyen-sinh"
+            "id": "6508654905d5791ad671a4af",
+            "name": "Comedy",
+            "slug": "comedy"
           },
           {
-            "id": "6508654905d5791ad671a4be",
-            "name": "Drama",
-            "slug": "drama"
-          },
-          {
-            "id": "6508654905d5791ad671a4c7",
-            "name": "Fantasy",
-            "slug": "fantasy"
-          },
-          {
-            "id": "6508654905d5791ad671a4da",
-            "name": "Manhwa",
-            "slug": "manhwa"
+            "id": "6508654905d5791ad671a4d6",
+            "name": "Manga",
+            "slug": "manga"
           },
           {
             "id": "6508654905d5791ad671a4e4",
@@ -443,111 +384,9 @@
             "slug": "romance"
           },
           {
-            "id": "6508654a05d5791ad671a510",
-            "name": "Truyện Màu",
-            "slug": "truyen-mau"
-          },
-          {
-            "id": "6508654a05d5791ad671a514",
-            "name": "Webtoon",
-            "slug": "webtoon"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:54:06.798Z",
-        "chaptersLatest": [
-          {
-            "filename": "Kiếp Này Tôi Nhất Định Trở Thành Gia Chủ! [Chap 152-182]",
-            "chapter_name": "182",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201bf7c926626890a95925"
-          }
-        ]
-      },
-      {
-        "_id": "67f28276bd508bf3887fce93",
-        "name": "Khu Rừng Hoang Dã",
-        "slug": "khu-rung-hoang-da",
-        "origin_name": [
-          "Khu Rừng Hoang Dã"
-        ],
-        "status": "ongoing",
-        "thumb_url": "khu-rung-hoang-da-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a491",
-            "name": "Action",
-            "slug": "action"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:53:35.943Z",
-        "chaptersLatest": [
-          {
-            "filename": "Khu Rừng Hoang Dã [Chap 14]",
-            "chapter_name": "14",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201af2c926626890a9589f"
-          }
-        ]
-      },
-      {
-        "_id": "67a43adfa4a4a602fb860fcf",
-        "name": "Kế Hoạch Nghỉ Hưu Của Nhân Vật Phản Diện",
-        "slug": "ke-hoach-nghi-huu-cua-nhan-vat-phan-dien",
-        "origin_name": [
-          "Kế Hoạch Nghỉ Hưu Của Nhân Vật Phản Diện"
-        ],
-        "status": "ongoing",
-        "thumb_url": "ke-hoach-nghi-huu-cua-nhan-vat-phan-dien-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a491",
-            "name": "Action",
-            "slug": "action"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:53:25.368Z",
-        "chaptersLatest": [
-          {
-            "filename": "Kế Hoạch Nghỉ Hưu Của Nhân Vật Phản Diện [Chap 39]",
-            "chapter_name": "39",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201aeec926626890a95899"
-          }
-        ]
-      },
-      {
-        "_id": "658f7e2d10dc9c0a7e2e4e1e",
-        "name": "I Found a Female Knight in a Rice Field in the Countryside They Think She’s My Wife",
-        "slug": "i-found-a-female-knight-in-a-rice-field-in-the-countryside-they-think-shes-my-wife",
-        "origin_name": [
-          "Tanbo de Hirotta Onna Kishi",
-          "Inaka de Ore no Yome da to Omowareteiru"
-        ],
-        "status": "ongoing",
-        "thumb_url": "i-found-a-female-knight-in-a-rice-field-in-the-countryside-they-think-shes-my-wife-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a4af",
-            "name": "Comedy",
-            "slug": "comedy"
-          },
-          {
-            "id": "6508654905d5791ad671a4c7",
-            "name": "Fantasy",
-            "slug": "fantasy"
-          },
-          {
-            "id": "6508654905d5791ad671a4d6",
-            "name": "Manga",
-            "slug": "manga"
-          },
-          {
-            "id": "6508654905d5791ad671a4ea",
-            "name": "Romance",
-            "slug": "romance"
+            "id": "6508654905d5791ad671a4ec",
+            "name": "School Life",
+            "slug": "school-life"
           },
           {
             "id": "6508654a05d5791ad671a4fa",
@@ -555,67 +394,25 @@
             "slug": "slice-of-life"
           }
         ],
-        "updatedAt": "2025-05-11T03:53:15.441Z",
+        "updatedAt": "2025-05-18T04:14:55.668Z",
         "chaptersLatest": [
           {
-            "filename": "I Found A Female Knight In A Rice Field In The Countryside They Think She’s My Wife [Chap 39-40]",
-            "chapter_name": "40",
+            "filename": "Kuroiwa Medaka Ni Watashi No Kawaii Ga Tsuujinai [Chap 176]",
+            "chapter_name": "176",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ae9c926626890a95893"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d89c705a578a7fdab8f"
           }
         ]
       },
       {
-        "_id": "658f7d0110dc9c0a7e2e4c37",
-        "name": "Học Viện Tối Thượng",
-        "slug": "hoc-vien-toi-thuong",
+        "_id": "6807ad7b54ddf1823a41f79c",
+        "name": "Khi Tôi Xuyên Vào Gia Đình Toàn Phản Diện",
+        "slug": "khi-toi-xuyen-vao-gia-dinh-toan-phan-dien",
         "origin_name": [
-          ""
+          "Khi Tôi Xuyên Vào Gia Đình Toàn Phản Diện"
         ],
         "status": "ongoing",
-        "thumb_url": "hoc-vien-toi-thuong-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a491",
-            "name": "Action",
-            "slug": "action"
-          },
-          {
-            "id": "6508654905d5791ad671a4da",
-            "name": "Manhwa",
-            "slug": "manhwa"
-          },
-          {
-            "id": "6508654a05d5791ad671a504",
-            "name": "Supernatural",
-            "slug": "supernatural"
-          },
-          {
-            "id": "6508654a05d5791ad671a510",
-            "name": "Truyện Màu",
-            "slug": "truyen-mau"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:53:03.998Z",
-        "chaptersLatest": [
-          {
-            "filename": "Học Viện Tối Thượng [Chap 154-156]",
-            "chapter_name": "156",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ae4c926626890a9588a"
-          }
-        ]
-      },
-      {
-        "_id": "669126bcc8f1e8e44d73b91b",
-        "name": "Hoán Đổi Diệu Kỳ",
-        "slug": "hoan-doi-dieu-ky",
-        "origin_name": [
-          ""
-        ],
-        "status": "ongoing",
-        "thumb_url": "hoan-doi-dieu-ky-thumb.jpg",
+        "thumb_url": "khi-toi-xuyen-vao-gia-dinh-toan-phan-dien-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -624,13 +421,40 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:52:50.224Z",
+        "updatedAt": "2025-05-18T04:14:45.652Z",
         "chaptersLatest": [
           {
-            "filename": "Hoán Đổi Diệu Kỳ [Chap 554]",
-            "chapter_name": "554",
+            "filename": "Khi Tôi Xuyên Vào Gia Đình Toàn Phản Diện [Chap 11]",
+            "chapter_name": "11",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ac9c926626890a9587e"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d88c705a578a7fdab89"
+          }
+        ]
+      },
+      {
+        "_id": "6807ad0454ddf1823a41f6dd",
+        "name": "Kết Thúc Có Hậu Cho Nhân Vật Phản Diện Trẻ Tuổi",
+        "slug": "ket-thuc-co-hau-cho-nhan-vat-phan-dien-tre-tuoi",
+        "origin_name": [
+          "Kết Thúc Có Hậu Cho Nhân Vật Phản Diện Trẻ Tuổi"
+        ],
+        "status": "ongoing",
+        "thumb_url": "ket-thuc-co-hau-cho-nhan-vat-phan-dien-tre-tuoi-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:14:33.727Z",
+        "chaptersLatest": [
+          {
+            "filename": "Kết Thúc Có Hậu Cho Nhân Vật Phản Diện Trẻ Tuổi [Chap 9]",
+            "chapter_name": "9",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d88c705a578a7fdab83"
           }
         ]
       },
@@ -651,77 +475,25 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:52:15.834Z",
+        "updatedAt": "2025-05-18T04:14:22.325Z",
         "chaptersLatest": [
           {
-            "filename": "Hoá Ra Ta Đã Vô Địch Từ Lâu [Chap 285.1-289]",
-            "chapter_name": "289",
+            "filename": "Hoá Ra Ta Đã Vô Địch Từ Lâu [Chap 292]",
+            "chapter_name": "292",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ac1c705a578a7fd8224"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d85c705a578a7fdab80"
           }
         ]
       },
       {
-        "_id": "659121d010dc9c0a7e2e5794",
-        "name": "Hổ Đến Chơi Nhà",
-        "slug": "ho-den-choi-nha",
-        "origin_name": [
-          "Hổ Tới Chơi Nhà"
-        ],
-        "status": "ongoing",
-        "thumb_url": "ho-den-choi-nha-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a4af",
-            "name": "Comedy",
-            "slug": "comedy"
-          },
-          {
-            "id": "6508654905d5791ad671a4c7",
-            "name": "Fantasy",
-            "slug": "fantasy"
-          },
-          {
-            "id": "6508654905d5791ad671a4da",
-            "name": "Manhwa",
-            "slug": "manhwa"
-          },
-          {
-            "id": "6508654905d5791ad671a4ea",
-            "name": "Romance",
-            "slug": "romance"
-          },
-          {
-            "id": "6508654a05d5791ad671a4fa",
-            "name": "Slice of Life",
-            "slug": "slice-of-life"
-          },
-          {
-            "id": "6508654a05d5791ad671a510",
-            "name": "Truyện Màu",
-            "slug": "truyen-mau"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:51:59.450Z",
-        "chaptersLatest": [
-          {
-            "filename": "Hổ Đến Chơi Nhà [Chap 134-139]",
-            "chapter_name": "139",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ab6c705a578a7fd820f"
-          }
-        ]
-      },
-      {
-        "_id": "658e770710dc9c0a7e2e42af",
-        "name": "Hẹn Hò Cùng Hắc Thuật Sư",
-        "slug": "hen-ho-cung-hac-thuat-su",
+        "_id": "656809f368e54cf5b50811f4",
+        "name": "Hiệp Khách Hành bất thông",
+        "slug": "hiep-khach-hanh-bat-thong",
         "origin_name": [
           ""
         ],
-        "status": "coming_soon",
-        "thumb_url": "hen-ho-cung-hac-thuat-su-thumb.jpg",
+        "status": "ongoing",
+        "thumb_url": "hiep-khach-hanh-bat-thong-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -735,9 +507,115 @@
             "slug": "comedy"
           },
           {
-            "id": "6508654905d5791ad671a4c4",
-            "name": "Ecchi",
-            "slug": "ecchi"
+            "id": "6508654905d5791ad671a4d8",
+            "name": "Manhua",
+            "slug": "manhua"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:14:06.745Z",
+        "chaptersLatest": [
+          {
+            "filename": "Hiệp Khách Hành Bất Thông [Chap 19-23]",
+            "chapter_name": "23",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d84c705a578a7fdab7c"
+          }
+        ]
+      },
+      {
+        "_id": "67da8f55a4a4a602fb8de339",
+        "name": "Hải Vương Sau Khi Hoàn Lương Sa Vào Tu La Tràng",
+        "slug": "hai-vuong-sau-khi-hoan-luong-sa-vao-tu-la-trang",
+        "origin_name": [
+          "Hải Vương Sau Khi Hoàn Lương Sa Vào Tu La Tràng"
+        ],
+        "status": "ongoing",
+        "thumb_url": "hai-vuong-sau-khi-hoan-luong-sa-vao-tu-la-trang-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:13:53.874Z",
+        "chaptersLatest": [
+          {
+            "filename": "Hải Vương Sau Khi Hoàn Lương Sa Vào Tu La Tràng [Chap 44]",
+            "chapter_name": "44",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d7ec705a578a7fdab65"
+          }
+        ]
+      },
+      {
+        "_id": "65989a5368e54cf5b50a06fa",
+        "name": "Giả Vờ Làm Kẻ Vô Dụng Ở Học Đường",
+        "slug": "gia-vo-lam-phe-vat-hoc-duong",
+        "origin_name": [
+          "Giả Vờ Làm Kẻ Vô Dụng Ở Học Đường"
+        ],
+        "status": "ongoing",
+        "thumb_url": "gia-vo-lam-phe-vat-hoc-duong-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          },
+          {
+            "id": "6508654905d5791ad671a4da",
+            "name": "Manhwa",
+            "slug": "manhwa"
+          },
+          {
+            "id": "6508654905d5791ad671a4f6",
+            "name": "Shounen",
+            "slug": "shounen"
+          },
+          {
+            "id": "6508654a05d5791ad671a510",
+            "name": "Truyện Màu",
+            "slug": "truyen-mau"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:13:43.921Z",
+        "chaptersLatest": [
+          {
+            "filename": "Giả Vờ Làm Kẻ Vô Dụng Ở Học Đường [Chap 107-113]",
+            "chapter_name": "113",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d7dc705a578a7fdab61"
+          }
+        ]
+      },
+      {
+        "_id": "658e76f468e54cf5b508fd89",
+        "name": "Gia Đình Điệp Viên",
+        "slug": "gia-dinh-diep-vien",
+        "origin_name": [
+          "Spy x Family"
+        ],
+        "status": "coming_soon",
+        "thumb_url": "gia-dinh-diep-vien-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          },
+          {
+            "id": "6508654905d5791ad671a4a6",
+            "name": "Adventure",
+            "slug": "adventure"
+          },
+          {
+            "id": "6508654905d5791ad671a4af",
+            "name": "Comedy",
+            "slug": "comedy"
           },
           {
             "id": "6508654905d5791ad671a4d6",
@@ -748,27 +626,32 @@
             "id": "6508654905d5791ad671a4ea",
             "name": "Romance",
             "slug": "romance"
+          },
+          {
+            "id": "6508654905d5791ad671a4f6",
+            "name": "Shounen",
+            "slug": "shounen"
           }
         ],
-        "updatedAt": "2025-05-11T03:51:43.659Z",
+        "updatedAt": "2025-05-18T04:13:28.801Z",
         "chaptersLatest": [
           {
-            "filename": "Hẹn Hò Cùng Hắc Thuật Sư [Chap 54]",
-            "chapter_name": "54",
+            "filename": "Gia Đình Điệp Viên [Chap 113-116]",
+            "chapter_name": "116",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201aa4c705a578a7fd81fa"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d55c705a578a7fdab44"
           }
         ]
       },
       {
-        "_id": "67da8f6c9ef8dcdadf6bacb9",
-        "name": "Hàn Băng Võ Giả",
-        "slug": "han-bang-vo-gia",
+        "_id": "6735f40a80217a7ba9bef57b",
+        "name": "Đồng Tiền Kham Thế",
+        "slug": "dong-tien-kham-the",
         "origin_name": [
-          "Hàn Băng Võ Giả"
+          ""
         ],
         "status": "ongoing",
-        "thumb_url": "han-bang-vo-gia-thumb.jpg",
+        "thumb_url": "dong-tien-kham-the-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -777,25 +660,124 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:51:33.127Z",
+        "updatedAt": "2025-05-18T04:13:16.742Z",
         "chaptersLatest": [
           {
-            "filename": "Hàn Băng Võ Giả [Chap 17]",
-            "chapter_name": "17",
+            "filename": "Đồng Tiền Kham Thế [Chap 128]",
+            "chapter_name": "128",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201aa3c705a578a7fd81f4"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d47c705a578a7fdab23"
           }
         ]
       },
       {
-        "_id": "6757b5c8a4a4a602fb7a4eaf",
-        "name": "Hades Và Persephone",
-        "slug": "hades-va-persephone",
+        "_id": "6629d82a66b83f0711208554",
+        "name": "Đôi ta hoàn toàn trái ngược",
+        "slug": "doi-ta-hoan-toan-trai-nguoc",
         "origin_name": [
-          "Hades Và Persephone"
+          "Pupposites Attract"
         ],
         "status": "ongoing",
-        "thumb_url": "hades-va-persephone-thumb.jpg",
+        "thumb_url": "doi-ta-hoan-toan-trai-nguoc-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a4af",
+            "name": "Comedy",
+            "slug": "comedy"
+          },
+          {
+            "id": "6508654905d5791ad671a4d0",
+            "name": "Horror",
+            "slug": "horror"
+          },
+          {
+            "id": "6508654905d5791ad671a4d6",
+            "name": "Manga",
+            "slug": "manga"
+          },
+          {
+            "id": "6508654a05d5791ad671a4fa",
+            "name": "Slice of Life",
+            "slug": "slice-of-life"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:13:00.451Z",
+        "chaptersLatest": [
+          {
+            "filename": "Đôi Ta Hoàn Toàn Trái Ngược [Chap 26]",
+            "chapter_name": "26",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d41c705a578a7fdab0e"
+          }
+        ]
+      },
+      {
+        "_id": "658b911410dc9c0a7e2e347e",
+        "name": "Độc Cô Tử Linh Sư",
+        "slug": "doc-co-tu-linh-su",
+        "origin_name": [
+          "Kẻ Chiêu Hồn Cô Độc"
+        ],
+        "status": "ongoing",
+        "thumb_url": "doc-co-tu-linh-su-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          },
+          {
+            "id": "6508654905d5791ad671a4c7",
+            "name": "Fantasy",
+            "slug": "fantasy"
+          },
+          {
+            "id": "6508654905d5791ad671a4da",
+            "name": "Manhwa",
+            "slug": "manhwa"
+          },
+          {
+            "id": "6508654905d5791ad671a4f6",
+            "name": "Shounen",
+            "slug": "shounen"
+          },
+          {
+            "id": "6508654a05d5791ad671a504",
+            "name": "Supernatural",
+            "slug": "supernatural"
+          },
+          {
+            "id": "6508654a05d5791ad671a510",
+            "name": "Truyện Màu",
+            "slug": "truyen-mau"
+          },
+          {
+            "id": "6508654a05d5791ad671a514",
+            "name": "Webtoon",
+            "slug": "webtoon"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:12:47.569Z",
+        "chaptersLatest": [
+          {
+            "filename": "Độc Cô Tử Linh Sư [Chap 168]",
+            "chapter_name": "168",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d43c705a578a7fdab17"
+          }
+        ]
+      },
+      {
+        "_id": "67bad3efa4a4a602fb8910f8",
+        "name": "Đô Thị Cực Phẩm Y Thần",
+        "slug": "do-thi-cuc-pham-y-than",
+        "origin_name": [
+          ""
+        ],
+        "status": "ongoing",
+        "thumb_url": "do-thi-cuc-pham-y-than-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -804,26 +786,119 @@
             "slug": "action"
           }
         ],
-        "updatedAt": "2025-05-11T03:51:17.561Z",
+        "updatedAt": "2025-05-18T04:12:35.715Z",
         "chaptersLatest": [
           {
-            "filename": "Hades Và Persephone [Chap 43]",
-            "chapter_name": "43",
+            "filename": "Đô Thị Cực Phẩm Y Thần [Chap 253]",
+            "chapter_name": "253",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201a9ec705a578a7fd81ee"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d3ac705a578a7fdaaeb"
           }
         ]
       },
       {
-        "_id": "6591219668e54cf5b50913b0",
-        "name": "Hắc Kị Sĩ Thiên Tài Giới Hạn Thời Gian",
-        "slug": "hac-ki-si-thien-tai-gioi-han-thoi-gian",
+        "_id": "6582635e10dc9c0a7e2df7b6",
+        "name": "Đô Thị Bắt Yêu Nhân",
+        "slug": "do-thi-bat-yeu-nhan",
         "origin_name": [
-          "Hắc Kị Sĩ Thiên Tài Đoản Mệnh",
-          "Hiệp Sĩ Thiên Tài Bóng Đêm"
+          ""
         ],
         "status": "ongoing",
-        "thumb_url": "hac-ki-si-thien-tai-gioi-han-thoi-gian-thumb.jpg",
+        "thumb_url": "do-thi-bat-yeu-nhan-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          },
+          {
+            "id": "6508654905d5791ad671a4cc",
+            "name": "Harem",
+            "slug": "harem"
+          },
+          {
+            "id": "6508654905d5791ad671a4d8",
+            "name": "Manhua",
+            "slug": "manhua"
+          },
+          {
+            "id": "6508654a05d5791ad671a510",
+            "name": "Truyện Màu",
+            "slug": "truyen-mau"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:12:22.458Z",
+        "chaptersLatest": [
+          {
+            "filename": "Đô Thị Bắt Yêu Nhân [Chap 96-99]",
+            "chapter_name": "99",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d46c705a578a7fdab1f"
+          }
+        ]
+      },
+      {
+        "_id": "658f7c5610dc9c0a7e2e4b1d",
+        "name": "Đồ Long",
+        "slug": "do-long",
+        "origin_name": [
+          "Long Trảm"
+        ],
+        "status": "ongoing",
+        "thumb_url": "do-long-thumb.jpg",
+        "sub_docquyen": false,
+        "category": [
+          {
+            "id": "6508654905d5791ad671a491",
+            "name": "Action",
+            "slug": "action"
+          },
+          {
+            "id": "6508654905d5791ad671a4da",
+            "name": "Manhwa",
+            "slug": "manhwa"
+          },
+          {
+            "id": "6508654905d5791ad671a4f6",
+            "name": "Shounen",
+            "slug": "shounen"
+          },
+          {
+            "id": "6508654a05d5791ad671a504",
+            "name": "Supernatural",
+            "slug": "supernatural"
+          },
+          {
+            "id": "6508654a05d5791ad671a510",
+            "name": "Truyện Màu",
+            "slug": "truyen-mau"
+          },
+          {
+            "id": "6508654a05d5791ad671a514",
+            "name": "Webtoon",
+            "slug": "webtoon"
+          }
+        ],
+        "updatedAt": "2025-05-18T04:12:08.929Z",
+        "chaptersLatest": [
+          {
+            "filename": "Đồ Long [Chap 140-145]",
+            "chapter_name": "145",
+            "chapter_title": "",
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295d4ec705a578a7fdab35"
+          }
+        ]
+      },
+      {
+        "_id": "658f7d2a68e54cf5b5090813",
+        "name": "Đệ Nhất Võ Sư, Baek Cao Thủ",
+        "slug": "de-nhat-vo-su-baek-cao-thu",
+        "origin_name": [
+          "Giảng Sư Đứng Đầu: Baek Sư phụ"
+        ],
+        "status": "ongoing",
+        "thumb_url": "de-nhat-vo-su-baek-cao-thu-thumb.jpg",
         "sub_docquyen": false,
         "category": [
           {
@@ -837,9 +912,19 @@
             "slug": "chuyen-sinh"
           },
           {
+            "id": "6508654905d5791ad671a4b8",
+            "name": "Cổ Đại",
+            "slug": "co-dai"
+          },
+          {
             "id": "6508654905d5791ad671a4da",
             "name": "Manhwa",
             "slug": "manhwa"
+          },
+          {
+            "id": "6508654905d5791ad671a4dc",
+            "name": "Martial Arts",
+            "slug": "martial-arts"
           },
           {
             "id": "6508654a05d5791ad671a510",
@@ -847,105 +932,28 @@
             "slug": "truyen-mau"
           }
         ],
-        "updatedAt": "2025-05-11T03:51:03.344Z",
+        "updatedAt": "2025-05-18T04:11:53.548Z",
         "chaptersLatest": [
           {
-            "filename": "Hắc Kị Sĩ Thiên Tài Giới Hạn Thời Gian [Chap 98]",
-            "chapter_name": "98",
+            "filename": "Đệ Nhất Võ Sư Baek Cao Thủ [Chap 124]",
+            "chapter_name": "124",
             "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201ab0c926626890a95877"
-          }
-        ]
-      },
-      {
-        "_id": "6819d9dd54ddf1823a47067c",
-        "name": "Gọi Ta Là Quỷ Sai Đại Nhân",
-        "slug": "goi-ta-la-quy-sai-dai-nhan",
-        "origin_name": [
-          "Gọi Ta Là Quỷ Sai Đại Nhân"
-        ],
-        "status": "ongoing",
-        "thumb_url": "goi-ta-la-quy-sai-dai-nhan-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a491",
-            "name": "Action",
-            "slug": "action"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:50:47.148Z",
-        "chaptersLatest": [
-          {
-            "filename": "Gọi Ta Là Quỷ Sai Đại Nhân [Chap 1-89]",
-            "chapter_name": "89",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201aafc926626890a95874"
-          }
-        ]
-      },
-      {
-        "_id": "658f7e2b68e54cf5b50909bd",
-        "name": "Every day in a Vampire Family",
-        "slug": "every-day-in-a-vampire-family",
-        "origin_name": [
-          "Hiiragi",
-          "san chi no kyuuketsu Jijou"
-        ],
-        "status": "ongoing",
-        "thumb_url": "every-day-in-a-vampire-family-thumb.jpg",
-        "sub_docquyen": false,
-        "category": [
-          {
-            "id": "6508654905d5791ad671a4af",
-            "name": "Comedy",
-            "slug": "comedy"
-          },
-          {
-            "id": "6508654905d5791ad671a4d6",
-            "name": "Manga",
-            "slug": "manga"
-          },
-          {
-            "id": "6508654905d5791ad671a4e2",
-            "name": "Mystery",
-            "slug": "mystery"
-          },
-          {
-            "id": "6508654905d5791ad671a4ea",
-            "name": "Romance",
-            "slug": "romance"
-          },
-          {
-            "id": "6508654a05d5791ad671a4fa",
-            "name": "Slice of Life",
-            "slug": "slice-of-life"
-          }
-        ],
-        "updatedAt": "2025-05-11T03:50:37.398Z",
-        "chaptersLatest": [
-          {
-            "filename": "Every Day In A Vampire Family [Chap 26-29]",
-            "chapter_name": "29",
-            "chapter_title": "",
-            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68201a86c705a578a7fd81e7"
+            "chapter_api_data": "https://sv1.otruyencdn.com/v1/api/chapter/68295cdcc705a578a7fda931"
           }
         ]
       }
     ],
     "params": {
       "type_slug": "danh-sach",
-      "filterCategory": [
-        ""
-      ],
-      "sortField": "updatedAt",
-      "sortType": "desc",
+      "filterCategory": [],
+      "sortField": "",
       "pagination": {
-        "totalItems": 23090,
+        "totalItems": 23141,
         "totalItemsPerPage": 24,
         "currentPage": 1,
         "pageRanges": 5
-      }
+      },
+      "itemsUpdateInDay": 43
     },
     "type_list": "truyen-moi",
     "APP_DOMAIN_FRONTEND": "https://otruyen.cc",
