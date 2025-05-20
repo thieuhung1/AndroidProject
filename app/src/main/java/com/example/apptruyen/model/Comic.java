@@ -19,7 +19,6 @@ public class Comic implements Serializable {
         public String chapter_name;
         public String chapter_title;
         public String chapter_api_data;
-        public String chapter_id;
     public static class Category implements Serializable {
             public String id;
             public String name;

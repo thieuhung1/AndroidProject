@@ -1,5 +1,6 @@
 package com.example.apptruyen.Home;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -16,20 +17,22 @@ import com.example.apptruyen.model.Comic;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.example.apptruyen.firebase.ChapterAdapter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
-import android.content.Intent;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ChapterDetail extends AppCompatActivity {
     private static final String TAG = "ChapterDetail";
@@ -40,7 +43,7 @@ public class ChapterDetail extends AppCompatActivity {
     private RecyclerView recyclerChapters;
     private ChapterAdapter chapterAdapter;
     private FirebaseFirestore db;
-    private String comicId,slug;
+    private String comicId, slug, comicslug;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,17 +51,17 @@ public class ChapterDetail extends AppCompatActivity {
         setContentView(R.layout.chapterdetail);
         db = FirebaseFirestore.getInstance();
         initViews();
-        recyclerChapters.setLayoutManager(new LinearLayoutManager(this));
+
+        // Initialize RecyclerView and adapter
         chapterAdapter = new ChapterAdapter(new ArrayList<>());
         recyclerChapters.setAdapter(chapterAdapter);
+        recyclerChapters.setLayoutManager(new LinearLayoutManager(this));
+
         comicId = getIntent().getStringExtra("comicId");
+        comicslug = getIntent().getStringExtra("slug");
 
-        if (comicId == null) {
-            showErrorAndFinish("Không có ID truyện");
-            return;
-        }
         loadComicData();
-
+        loadChaptersFromApi(comicslug);
     }
 
     private void initViews() {
@@ -71,22 +74,25 @@ public class ChapterDetail extends AppCompatActivity {
         recyclerChapters = findViewById(R.id.recyclerChapters);
         slug = getIntent().getStringExtra("slug");
 
-        Log.d(TAG, "Slug truyện: " + slug);
-        if (slug == null || slug.isEmpty()) {
-            Log.e(TAG, "Slug truyện bị null hoặc rỗng, không gọi API được");
-            Toast.makeText(this, "Slug truyện không hợp lệ", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        loadChaptersFromApi(slug);
+
 
         btnDocTruyen.setOnClickListener(v -> {
-            if (chapterList.size() > 0) {
-                // Lấy chapter đầu tiên (thường là chapter có số index lớn nhất trong danh sách)
-                Comic.Chapter firstChapter = chapterList.get(chapterList.size() - 1);
+            if (!chapterList.isEmpty()) {
+                // Sort chapters by chapter_name (descending) and pick the latest
+                Collections.sort(chapterList, (c1, c2) -> {
+                    try {
+                        int num1 = Integer.parseInt(c1.chapter_name.replaceAll("\\D+", ""));
+                        int num2 = Integer.parseInt(c2.chapter_name.replaceAll("\\D+", ""));
+                        return num2 - num1; // Descending order
+                    } catch (NumberFormatException e) {
+                        return c2.chapter_name.compareTo(c1.chapter_name);
+                    }
+                });
+                Comic.Chapter latestChapter = chapterList.get(0); // Latest chapter after sorting
                 Intent intent = new Intent(this, ChapterContentActivity.class);
-                intent.putExtra("chapter_api_url", firstChapter.chapter_api_data);
-                intent.putExtra("chapter_name", firstChapter.chapter_name);
-                intent.putExtra("chapter_title", firstChapter.chapter_title);
+                intent.putExtra("chapter_api_url", latestChapter.chapter_api_data);
+                intent.putExtra("chapter_name", latestChapter.chapter_name);
+                intent.putExtra("chapter_title", latestChapter.chapter_title);
                 startActivity(intent);
             } else {
                 Toast.makeText(this, "Không có chapter nào để đọc", Toast.LENGTH_SHORT).show();
@@ -102,7 +108,6 @@ public class ChapterDetail extends AppCompatActivity {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             updateUI(document);
-
                         } else {
                             showErrorAndFinish("Truyện không tồn tại");
                         }
@@ -136,81 +141,44 @@ public class ChapterDetail extends AppCompatActivity {
         }
     }
 
-//    private void loadChapters(DocumentSnapshot document) {
-//        List<Comic.Chapter> chapters = new ArrayList<>();
-//
-//        try {
-//
-//            @SuppressWarnings("unchecked")
-//            List<Map<String, Object>> chaptersLatest = (List<Map<String, Object>>) document.get("chaptersLatest");
-//
-//            if (chaptersLatest != null && !chaptersLatest.isEmpty()) {
-//                for (Map<String, Object> chapterMap : chaptersLatest) {
-//                    Comic.Chapter chapter = new Comic.Chapter();
-//                    chapter.filename = (String) chapterMap.get("filename");
-//                    chapter.chapter_name = (String) chapterMap.get("chapter_name");
-//                    chapter.chapter_title = (String) chapterMap.get("chapter_title");
-//                    chapter.chapter_api_data = (String) chapterMap.get("chapter_api_data");
-//                    chapters.add(chapter);
-//                }
-//
-//
-//                Collections.sort(chapters, (c1, c2) -> {
-//                    try {
-//                        int num1 = Integer.parseInt(c1.chapter_name.replaceAll("\\D+", ""));
-//                        int num2 = Integer.parseInt(c2.chapter_name.replaceAll("\\D+", ""));
-//                        return num2 - num1;
-//                    } catch (NumberFormatException e) {
-//                        return c2.chapter_name.compareTo(c1.chapter_name);
-//                    }
-//                });
-//
-//                this.chapterList = chapters;
-//                chapterAdapter.updateChapters(chapters);
-//            } else {
-//                Toast.makeText(this, "Không có chapter nào", Toast.LENGTH_SHORT).show();
-//            }
-//        } catch (Exception e) {
-//            Log.e(TAG, "Error parsing chapters", e);
-//            Toast.makeText(this, "Lỗi khi tải danh sách chapter", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-
     private void loadChaptersFromApi(String slug) {
+        if (slug == null || slug.isEmpty()) {
+            runOnUiThread(() -> Toast.makeText(this, "Invalid comic slug", Toast.LENGTH_SHORT).show());
+            return;
+        }
+
         new Thread(() -> {
+            HttpURLConnection connection = null;
+            BufferedReader reader = null;
             try {
                 URL url = new URL("https://otruyenapi.com/v1/api/truyen-tranh/" + slug);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
-                connection.setConnectTimeout(15000); // Add timeout
+                connection.setConnectTimeout(30000);
+                connection.setReadTimeout(30000);
 
                 int responseCode = connection.getResponseCode();
                 Log.d(TAG, "API Response Code: " + responseCode);
 
                 if (responseCode != HttpURLConnection.HTTP_OK) {
                     runOnUiThread(() -> Toast.makeText(this,
-                            "API Error: " + responseCode, Toast.LENGTH_SHORT).show());
+                            "API Error: HTTP " + responseCode, Toast.LENGTH_SHORT).show());
                     return;
                 }
 
-                BufferedReader reader = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()));
+                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                 StringBuilder result = new StringBuilder();
                 String line;
                 while ((line = reader.readLine()) != null) {
                     result.append(line);
                 }
-                reader.close();
 
                 String jsonResponse = result.toString();
-                Log.d(TAG, "API Response (first 200 chars): " +
-                        jsonResponse.substring(0, Math.min(jsonResponse.length(), 200)));
+                Log.d(TAG, "Full API Response: " + jsonResponse);
 
                 JSONObject json = new JSONObject(jsonResponse);
-
-                // Verify API returned success status
-                boolean status = json.optBoolean("status", false);
-                if (!status) {
+                String status = json.optString("status", "");
+                if (!status.equalsIgnoreCase("success")) {
                     String message = json.optString("message", "Unknown error");
                     Log.e(TAG, "API returned error: " + message);
                     runOnUiThread(() -> Toast.makeText(this,
@@ -218,43 +186,90 @@ public class ChapterDetail extends AppCompatActivity {
                     return;
                 }
 
-                JSONArray chapterArray = json.getJSONObject("data").getJSONArray("chapters");
-                Log.d(TAG, "Found " + chapterArray.length() + " chapters in API response");
-
-                List<Comic.Chapter> chapters = new ArrayList<>();
-                for (int i = 0; i < chapterArray.length(); i++) {
-                    JSONObject chap = chapterArray.getJSONObject(i);
-                    Comic.Chapter chapter = new Comic.Chapter();
-
-                    chapter.chapter_name = chap.optString("chapter_name", "Chapter ?");
-                    chapter.chapter_title = chap.optString("chapter_title", "");
-                    chapter.chapter_api_data = chap.optString("chapter_api_data", "");
-                    chapter.filename = chap.optString("filename", "");
-
-                    chapters.add(chapter);
+                JSONObject data = json.getJSONObject("data");
+                JSONObject item = data.getJSONObject("item");
+                JSONArray chaptersArray = item.getJSONArray("chapters");
+                if (chaptersArray.length() == 0) {
+                    runOnUiThread(() -> Toast.makeText(this, "No chapters found", Toast.LENGTH_SHORT).show());
+                    return;
                 }
 
-                final List<Comic.Chapter> finalChapters = chapters;
+                JSONArray chapterServerData = chaptersArray.getJSONObject(0).getJSONArray("server_data");
+                Log.d(TAG, "Found " + chapterServerData.length() + " chapters in API response");
+
+                List<Comic.Chapter> chapters = IntStream.range(0, chapterServerData.length())
+                        .mapToObj(i -> {
+                            try {
+                                JSONObject chap = chapterServerData.getJSONObject(i);
+                                Comic.Chapter chapter = new Comic.Chapter();
+                                chapter.chapter_name = chap.optString("chapter_name", "Unknown Chapter");
+                                chapter.chapter_title = chap.optString("chapter_title", "");
+                                chapter.chapter_api_data = chap.optString("chapter_api_data", "");
+                                chapter.filename = chap.optString("filename", "");
+                                Log.d(TAG, "Chapter " + i + ": name=" + chapter.chapter_name);
+                                return chapter;
+                            } catch (JSONException e) {
+                                Log.e(TAG, "Error parsing chapter at index " + i, e);
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+
                 runOnUiThread(() -> {
-                    if (finalChapters.isEmpty()) {
+                    if (isFinishing() || isDestroyed()) return;
+                    if (chapters.isEmpty()) {
                         Toast.makeText(this, "No chapters found", Toast.LENGTH_SHORT).show();
                     } else {
-                        this.chapterList = finalChapters;
-                        chapterAdapter.updateChapters(finalChapters);
-                        // Force adapter to refresh
+                        chapterList = chapters;
+                        chapterAdapter.updateChapters(chapters);
                         chapterAdapter.notifyDataSetChanged();
-                        Log.d(TAG, "Updated adapter with " + finalChapters.size() + " chapters");
+                        Log.d(TAG, "Updated adapter with " + chapters.size() + " chapters");
                     }
                 });
 
+            } catch (MalformedURLException e) {
+                Log.e(TAG, "Invalid URL: " + e.getMessage(), e);
+                runOnUiThread(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        Toast.makeText(this, "Error: Invalid URL", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "Network error: " + e.getMessage(), e);
+                runOnUiThread(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        Toast.makeText(this, "Error: Network issue", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } catch (JSONException e) {
+                Log.e(TAG, "JSON parsing error: " + e.getMessage(), e);
+                runOnUiThread(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        Toast.makeText(this, "Error: Invalid response format", Toast.LENGTH_SHORT).show();
+                    }
+                });
             } catch (Exception e) {
-                Log.e(TAG, "Error loading chapters from API", e);
-                runOnUiThread(() -> Toast.makeText(this,
-                        "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                Log.e(TAG, "Unexpected error: " + e.getMessage(), e);
+                runOnUiThread(() -> {
+                    if (!isFinishing() && !isDestroyed()) {
+                        Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, "Error closing reader", e);
+                    }
+                }
+                if (connection != null) {
+                    connection.disconnect();
+                }
             }
         }).start();
     }
-
 
     private void showErrorAndFinish(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();

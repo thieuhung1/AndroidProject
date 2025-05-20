@@ -18,12 +18,9 @@
         <activity
             android:name=".Home.ChapterDetail"
             android:exported="false" />
-        <activity
-            android:name=".Home.ReadComicActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Home.ComicDetailActivity"
-            android:exported="false" />
+        <activity android:name="com.example.apptruyen.Home.ChapterContentActivity"
+            android:exported="false"/>
+        
         <activity
             android:name=".Home.Home"
             android:exported="false" />

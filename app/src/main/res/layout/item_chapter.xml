@@ -3,41 +3,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="8dp"
-    android:background="?attr/selectableItemBackground">
+    android:padding="8dp">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/chapterName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/chapterName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="#333333"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=" - "
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/chapterTitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="Tiêu đề chapter" />
-    </LinearLayout>
-
-    <View
+    <TextView
+        android:id="@+id/chapterTitle"
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"
-        android:layout_marginTop="8dp" />
-
+        android:layout_height="wrap_content"
+        android:textSize="14sp" />
 </LinearLayout>

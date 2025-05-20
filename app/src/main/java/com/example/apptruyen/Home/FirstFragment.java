@@ -1,5 +1,6 @@
 package com.example.apptruyen.Home;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +18,7 @@ import com.example.apptruyen.firebase.ComicAdapter;
 import com.example.apptruyen.model.Comic;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+import java.util.stream.IntStream;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -61,6 +62,8 @@ public class FirstFragment extends Fragment {
         return view;
     }
 
+
+
     private void loadComicsFromJson() {
         try {
             InputStream is = requireContext().getAssets().open("comics.json");
@@ -73,37 +76,49 @@ public class FirstFragment extends Fragment {
             JSONObject root = new JSONObject(json);
             JSONArray items = root.getJSONObject("data").getJSONArray("items");
 
-            for (int i = 0; i < items.length(); i++) {
-                JSONObject obj = items.getJSONObject(i);
-                Comic comic = new Comic();
+            IntStream.range(0, items.length()).mapToObj(i -> {
+                try {
+                    JSONObject obj = items.getJSONObject(i);
+                    Comic comic = new Comic();
 
-                comic._id = obj.getString("_id");
-                comic.name = obj.getString("name"); // ✅ Sửa lỗi chỗ này
-                comic.slug = obj.getString("slug");
-                comic.origin_name = obj.getJSONArray("origin_name").join(",").replace("\"", "");
-                comic.status = obj.getString("status");
-                comic.thumb_url = obj.getString("thumb_url");
-                comic.updatedAt = obj.getString("updatedAt");
+                    comic._id = obj.getString("_id");
+                    comic.name = obj.getString("name");
+                    comic.slug = obj.getString("slug");
+                    comic.origin_name = obj.getJSONArray("origin_name").join(",").replace("\"", "");
+                    comic.status = obj.getString("status");
+                    comic.thumb_url = obj.getString("thumb_url");
+                    comic.updatedAt = obj.getString("updatedAt");
 
-                comic.category = new ArrayList<>();
-                JSONArray catArray = obj.getJSONArray("category");
-                for (int j = 0; j < catArray.length(); j++) {
-                    comic.category.add(catArray.getJSONObject(j).getString("name"));
+                    JSONArray catArray = obj.getJSONArray("category");
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                        comic.category = IntStream.range(0, catArray.length())
+                                .mapToObj(j -> {
+                                    try {
+                                        return catArray.getJSONObject(j).getString("name");
+                                    } catch (Exception e) {
+                                        return "";
+                                    }
+                                }).filter(s -> !s.isEmpty()).toList();
+                    }
+
+                    if (obj.has("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
+                        JSONObject chapObj = obj.getJSONArray("chaptersLatest").getJSONObject(0);
+                        Comic.Chapter chap = new Comic.Chapter();
+                        chap.filename = chapObj.optString("filename");
+                        chap.chapter_name = chapObj.optString("chapter_name");
+                        chap.chapter_title = chapObj.optString("chapter_title");
+                        chap.chapter_api_data = chapObj.optString("chapter_api_data");
+                        comic.latest_chapter = chap;
+                    }
+
+                    Log.d("COMIC_JSON", "✅ Đã load: " + comic.name);
+                    return comic;
+
+                } catch (Exception e) {
+                    Log.e("JSON_ERROR", "❌ Lỗi khi parse comic", e);
+                    return null;
                 }
-
-                if (obj.has("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
-                    JSONObject chapObj = obj.getJSONArray("chaptersLatest").getJSONObject(0);
-                    Comic.Chapter chap = new Comic.Chapter();
-                    chap.filename = chapObj.optString("filename");
-                    chap.chapter_name = chapObj.optString("chapter_name");
-                    chap.chapter_title = chapObj.optString("chapter_title");
-                    chap.chapter_api_data = chapObj.optString("chapter_api_data");
-                    comic.latest_chapter = chap;
-                }
-
-                Log.d("COMIC_JSON", "✅ Đã load: " + comic.name);
-                comicList.add(comic);
-            }
+            }).filter(comic -> comic != null).forEach(comicList::add);
 
             adapter.notifyDataSetChanged();
             uploadComicsToFirestore(comicList);
@@ -112,4 +127,5 @@ public class FirstFragment extends Fragment {
             Log.e("JSON_ERROR", "❌ Lỗi khi load comics từ JSON", e);
         }
     }
-}
+    }
+
