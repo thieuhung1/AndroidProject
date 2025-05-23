@@ -41,7 +41,7 @@
                     android:layout_width="120dp"
                     android:layout_height="180dp"
                     android:scaleType="centerCrop"
-                     />
+                    />
 
                 <LinearLayout
                     android:orientation="vertical"
@@ -90,20 +90,40 @@
                 android:layout_height="wrap_content"
                 android:paddingBottom="16dp" />
 
-            <!-- Nút đọc truyện -->
-            <Button
-                android:id="@+id/btnDocTruyen"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Đọc từ đầu"
-                android:textAllCaps="false"
-                android:textSize="16sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#7B5BBF"
-                android:layout_marginBottom="16dp"
-                android:padding="12dp" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
 
-            <!-- Viền trên -->
+                <!-- Nút đọc truyện -->
+                <Button
+                    android:id="@+id/btnDocTruyen"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Đọc từ đầu"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#7B5BBF"
+                    android:padding="12dp" />
+
+                <!-- Khoảng cách nhỏ giữa nút và icon -->
+                <Space
+                    android:layout_width="12dp"
+                    android:layout_height="wrap_content" />
+
+                <!-- Icon yêu thích -->
+                <ImageView
+                    android:id="@+id/btnYeuThich"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@drawable/ic_like"
+                    android:contentDescription="Yêu thích truyện"
+                    android:padding="4dp" />
+            </LinearLayout>
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

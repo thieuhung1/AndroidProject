@@ -1,8 +1,12 @@
 package com.example.apptruyen.Home;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,16 +15,21 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.apptruyen.R;
+import com.example.apptruyen.api.ApiService;
+import com.example.apptruyen.api.ChapterResponse;
 import com.example.apptruyen.firebase.ImageAdapter;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
 
 public class ChapterContentActivity extends AppCompatActivity {
     private static final String TAG = "ChapterContentActivity";
@@ -30,150 +39,165 @@ public class ChapterContentActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ImageAdapter imageAdapter;
     private List<String> imageUrls = new ArrayList<>();
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chapter_content);
 
-        // Khởi tạo các thành phần giao diện
-        progressBar = findViewById(R.id.progressBar);
-        recyclerImages = findViewById(R.id.recyclerImages);
-        tvNoContent = findViewById(R.id.tvNoContent);
-        toolbar = findViewById(R.id.toolbar);
+        initializeViews();
+        setupToolbar();
+        setupRecyclerView();
+        initializeRetrofit();
 
-        // Thiết lập Toolbar
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(v -> finish());
-
-        // Khởi tạo RecyclerView
-        recyclerImages.setLayoutManager(new LinearLayoutManager(this));
-        imageAdapter = new ImageAdapter(imageUrls);
-        recyclerImages.setAdapter(imageAdapter);
-
-        // Lấy dữ liệu từ Intent
         String chapterId = getIntent().getStringExtra("chapter_id");
         String chapterName = getIntent().getStringExtra("chapter_name");
         String chapterTitle = getIntent().getStringExtra("chapter_title");
 
-        // Kiểm tra ID chương
-        if (chapterId == null) {
-            Log.e(TAG, "ID chương không hợp lệ");
-            Toast.makeText(this, "ID chương không hợp lệ", Toast.LENGTH_SHORT).show();
+        if (chapterId == null || chapterId.isEmpty()) {
+            showError("Invalid chapter ID");
             finish();
             return;
         }
 
-        // Cập nhật tiêu đề Toolbar
-        String title = chapterTitle != null && !chapterTitle.isEmpty() ? chapterTitle : "Chương " + chapterName;
-        getSupportActionBar().setTitle(title);
-
-        // Tái tạo URL chương
-        String chapterApiUrl = "https://sv1.otruyencdn.com/v1/api/chapter/" + chapterId;
-        Log.d(TAG, "Đang tải chương ID: " + chapterId + ", URL: " + chapterApiUrl);
-
-        // Tải nội dung chương
-        loadChapterContent(chapterApiUrl);
+        setToolbarTitle(chapterTitle, chapterName);
+        loadChapterContent(chapterId);
     }
 
-    private void loadChapterContent(String chapterApiUrl) {
-        progressBar.setVisibility(View.VISIBLE);
-        recyclerImages.setVisibility(View.GONE);
-        tvNoContent.setVisibility(View.GONE);
+    private void initializeViews() {
+        progressBar = findViewById(R.id.progressBar);
+        recyclerImages = findViewById(R.id.recyclerImages);
+        tvNoContent = findViewById(R.id.tvNoContent);
+        toolbar = findViewById(R.id.toolbar);
+        Button retryButton = findViewById(R.id.retryButton);
+        retryButton.setOnClickListener(v -> loadChapterContent(getIntent().getStringExtra("chapter_id")));
+    }
 
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-            try {
-                URL url = new URL(chapterApiUrl);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setConnectTimeout(30000);
-                connection.setReadTimeout(30000);
+    private void setupToolbar() {
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            toolbar.setNavigationOnClickListener(v -> finish());
+        }
+    }
 
-                int responseCode = connection.getResponseCode();
-                Log.d(TAG, "Mã phản hồi API: " + responseCode);
+    private void setupRecyclerView() {
+        recyclerImages.setHasFixedSize(true);
+        recyclerImages.setLayoutManager(new LinearLayoutManager(this));
+        imageAdapter = new ImageAdapter(imageUrls);
+        recyclerImages.setAdapter(imageAdapter);
+    }
 
-                if (responseCode != HttpURLConnection.HTTP_OK) {
-                    runOnUiThread(() -> {
-                        progressBar.setVisibility(View.GONE);
-                        tvNoContent.setVisibility(View.VISIBLE);
-                        Toast.makeText(this, "Lỗi API: HTTP " + responseCode, Toast.LENGTH_SHORT).show();
-                    });
-                    return;
-                }
+    private void initializeRetrofit() {
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://sv1.otruyencdn.com/")
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+        apiService = retrofit.create(ApiService.class);
+    }
 
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder result = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    result.append(line);
-                }
+    private void setToolbarTitle(String chapterTitle, String chapterName) {
+        String title = (chapterTitle != null && !chapterTitle.isEmpty()) ? chapterTitle : "Chapter " + chapterName;
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(title);
+        }
+    }
 
-                String jsonResponse = result.toString();
-                Log.d(TAG, "Phản hồi API: " + jsonResponse);
+    private boolean isNetworkAvailable() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+    }
 
-                JSONObject json = new JSONObject(jsonResponse);
-                String status = json.optString("status", "");
-                if (!status.equalsIgnoreCase("success")) {
-                    String message = json.optString("message", "Lỗi không xác định");
-                    Log.e(TAG, "API trả về lỗi: " + message);
-                    runOnUiThread(() -> {
-                        progressBar.setVisibility(View.GONE);
-                        tvNoContent.setVisibility(View.VISIBLE);
-                        Toast.makeText(this, "Lỗi API: " + message, Toast.LENGTH_SHORT).show();
-                    });
-                    return;
-                }
+    private void loadChapterContent(String chapterId) {
+        if (!isNetworkAvailable()) {
+            showError("No network connection");
+            return;
+        }
+        Log.d(TAG, "Loading chapter with ID: " + chapterId + ", Network: " +
+                (isNetworkAvailable() ? "Connected" : "Disconnected"));
+        setUIState(true, false);
+        retryRequest(chapterId, 3, 0);
+    }
 
-                JSONObject data = json.getJSONObject("data");
-                JSONObject item = data.getJSONObject("item");
-                JSONArray images = item.getJSONArray("chapter_image");
+    private void retryRequest(String chapterId, int maxRetries, int attempt) {
+        if (attempt >= maxRetries) {
+            showError("Failed to load chapter after " + maxRetries + " attempts");
+            return;
+        }
+        apiService.getChapterContent(chapterId).enqueue(new Callback<ChapterResponse>() {
+            @Override
+            public void onResponse(Call<ChapterResponse> call, Response<ChapterResponse> response) {
+                if (isFinishing()) return;
+                handleResponse(response);
+            }
 
-                List<String> newImageUrls = new ArrayList<>();
-                for (int i = 0; i < images.length(); i++) {
-                    JSONObject image = images.getJSONObject(i);
-                    String imageUrl = image.optString("image_cdn", "");
-                    if (!imageUrl.isEmpty()) {
-                        newImageUrls.add(imageUrl);
-                    }
-                }
-
-                runOnUiThread(() -> {
-                    if (isFinishing()) return;
-                    progressBar.setVisibility(View.GONE);
-                    if (newImageUrls.isEmpty()) {
-                        tvNoContent.setVisibility(View.VISIBLE);
+            @Override
+            public void onFailure(Call<ChapterResponse> call, Throwable t) {
+                if (!isFinishing()) {
+                    Log.e(TAG, "Attempt " + (attempt + 1) + " failed: " + t.getMessage());
+                    if (t instanceof SocketTimeoutException) {
+                        retryRequest(chapterId, maxRetries, attempt + 1);
                     } else {
-                        imageUrls.clear();
-                        imageUrls.addAll(newImageUrls);
-                        imageAdapter.notifyDataSetChanged();
-                        recyclerImages.setVisibility(View.VISIBLE);
+                        showError("Error: " + t.getMessage());
                     }
-                });
-
-            } catch (Exception e) {
-                Log.e(TAG, "Lỗi khi tải nội dung chương: " + e.getMessage(), e);
-                runOnUiThread(() -> {
-                    if (!isFinishing()) {
-                        progressBar.setVisibility(View.GONE);
-                        tvNoContent.setVisibility(View.VISIBLE);
-                        Toast.makeText(this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (Exception e) {
-                        Log.e(TAG, "Lỗi khi đóng reader", e);
-                    }
-                }
-                if (connection != null) {
-                    connection.disconnect();
                 }
             }
-        }).start();
+        });
+    }
+
+    private void handleResponse(Response<ChapterResponse> response) {
+        setUIState(false, false);
+        if (!response.isSuccessful()) {
+            showError("API error: HTTP " + response.code());
+            return;
+        }
+
+        ChapterResponse chapterResponse = response.body();
+        if (chapterResponse == null || !"success".equalsIgnoreCase(chapterResponse.status)) {
+            showError(chapterResponse != null ? chapterResponse.message : "Unknown error");
+            return;
+        }
+
+        List<String> newImageUrls = chapterResponse.data.item.chapterImage != null
+                ? chapterResponse.data.item.chapterImage.stream()
+                .filter(image -> image.imageFile != null && !image.imageFile.isEmpty())
+                .map(image -> chapterResponse.data.domainCdn + "/" +
+                        chapterResponse.data.item.chapterPath + "/" +
+                        image.imageFile)
+                .collect(Collectors.toList())
+                : new ArrayList<>();
+
+        if (newImageUrls.isEmpty()) {
+            showError("No images found");
+        } else {
+            updateImages(newImageUrls);
+        }
+    }
+
+    private void updateImages(List<String> newImageUrls) {
+        imageUrls.clear();
+        imageUrls.addAll(newImageUrls);
+        imageAdapter.notifyDataSetChanged();
+        setUIState(false, true);
+    }
+
+    private void setUIState(boolean isLoading, boolean hasContent) {
+        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        recyclerImages.setVisibility(hasContent ? View.VISIBLE : View.GONE);
+        findViewById(R.id.errorLayout).setVisibility(!isLoading && !hasContent ? View.VISIBLE : View.GONE);
+    }
+
+    private void showError(String message) {
+        Log.e(TAG, message);
+        setUIState(false, false);
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

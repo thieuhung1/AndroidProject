@@ -7,11 +7,13 @@ import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.apptruyen.R;
 import java.util.List;
 
 public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHolder> {
-    private List<String> imageUrls;
+    private static final String TAG = "ImageAdapter";
+    private final List<String> imageUrls;
 
     public ImageAdapter(List<String> imageUrls) {
         this.imageUrls = imageUrls;
@@ -20,7 +22,8 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     @NonNull
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_comic_image, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_comic_image, parent, false);
         return new ImageViewHolder(view);
     }
 
@@ -31,18 +34,21 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
                 .load(imageUrl)
                 .placeholder(R.drawable.placeholder_image)
                 .error(R.drawable.error_image)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .thumbnail(0.25f) // Load low-res preview first
+                .override(720, 1280) // Optimize image size
                 .into(holder.imageView);
     }
 
     @Override
     public int getItemCount() {
-        return imageUrls != null ? imageUrls.size() : 0;
+        return imageUrls.size();
     }
 
     static class ImageViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
 
-        public ImageViewHolder(@NonNull View itemView) {
+        ImageViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.imageView);
         }

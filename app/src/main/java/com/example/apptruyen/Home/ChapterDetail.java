@@ -120,7 +120,7 @@ public class ChapterDetail extends AppCompatActivity {
 
     private void updateUI(DocumentSnapshot document) {
         try {
-            tvTenTruyen.setText(document.getString("slug"));
+            tvTenTruyen.setText(document.getString("name"));
             tvTacGia.setText("Tác giả: " + document.getString("author"));
             tvGioiThieu.setText(document.getString("description"));
             List<String> categories = (List<String>) document.get("category");

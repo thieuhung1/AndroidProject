@@ -5,10 +5,30 @@
     android:layout_height="match_parent"
     tools:context=".Home.ThirdFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Tiêu đề "Truyện đã yêu thích" -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Truyện đã yêu thích"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal" />
+
+        <!-- RecyclerView để hiển thị danh sách truyện đã yêu thích -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerLikedComics"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:listitem="@layout/item_comic_liked" />
+
+    </LinearLayout>
 
 </FrameLayout>
