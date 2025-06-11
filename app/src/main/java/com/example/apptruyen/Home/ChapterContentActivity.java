@@ -17,7 +17,6 @@ import com.example.apptruyen.R;
 import com.example.apptruyen.api.ApiService;
 import com.example.apptruyen.api.ChapterResponse;
 import com.example.apptruyen.firebase.ImageAdapter;
-import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,13 +39,11 @@ public class ChapterContentActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private RecyclerView recyclerImages;
     private TextView tvNoContent;
-    private MaterialButton btnPrevChapter, btnNextChapter;
     private final List<String> imageUrls = new ArrayList<>();
     private ImageAdapter imageAdapter;
     private ApiService apiService;
     private String chapterId;
-    private ArrayList<String> chapterIds;
-    private int currentIndex;
+    private Call<ChapterResponse> currentCall; // Lưu call hiện tại để hủy
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,14 +54,11 @@ public class ChapterContentActivity extends AppCompatActivity {
         setupRecyclerView();
         setupRetrofit();
 
-        // Lấy dữ liệu từ Intent
-        chapterIds = getIntent().getStringArrayListExtra("chapter_ids");
-        currentIndex = getIntent().getIntExtra("current_index", -1);
+        // Lấy chapterId từ Intent
         chapterId = getIntent().getStringExtra("chapter_id");
 
-        if (chapterIds != null && currentIndex >= 0 && currentIndex < chapterIds.size()) {
-            chapterId = chapterIds.get(currentIndex);
-        }
+        // Debug Intent
+        Log.d(TAG, "Intent data: chapterId=" + chapterId);
 
         if (chapterId == null || chapterId.isEmpty()) {
             showError("ID chương không hợp lệ");
@@ -81,15 +75,14 @@ public class ChapterContentActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         recyclerImages = findViewById(R.id.recyclerImages);
         tvNoContent = findViewById(R.id.tvNoContent);
-        btnPrevChapter = findViewById(R.id.btnPrevChapter);
-        btnNextChapter = findViewById(R.id.btnNextChapter);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
 
         findViewById(R.id.retryButton).setOnClickListener(v -> loadChapter());
-        btnPrevChapter.setOnClickListener(v -> navigateChapter(-1));
-        btnNextChapter.setOnClickListener(v -> navigateChapter(1));
+
+        // Tắt animation mặc định khi chuyển Activity
+        overridePendingTransition(0, 0);
     }
 
     /**
@@ -108,7 +101,7 @@ public class ChapterContentActivity extends AppCompatActivity {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024)) // 20MB cache
+                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024))
                 .retryOnConnectionFailure(true)
                 .build();
 
@@ -138,6 +131,7 @@ public class ChapterContentActivity extends AppCompatActivity {
             return;
         }
         setUI(true, false);
+        Log.d(TAG, "Loading chapter with chapterId: " + chapterId);
         fetchData(0);
     }
 
@@ -145,10 +139,19 @@ public class ChapterContentActivity extends AppCompatActivity {
      * Gọi API lấy URL ảnh
      */
     private void fetchData(int attempt) {
-        apiService.getChapterContent(chapterId).enqueue(new retrofit2.Callback<ChapterResponse>() {
+        // Hủy call trước nếu còn tồn tại
+        if (currentCall != null) {
+            currentCall.cancel();
+            Log.d(TAG, "Canceled previous API call");
+        }
+
+        currentCall = apiService.getChapterContent(chapterId);
+        currentCall.enqueue(new retrofit2.Callback<ChapterResponse>() {
             @Override
             public void onResponse(Call<ChapterResponse> call, retrofit2.Response<ChapterResponse> res) {
+                currentCall = null;
                 if (!res.isSuccessful() || res.body() == null || !"success".equalsIgnoreCase(res.body().status)) {
+                    Log.e(TAG, "API error: " + (res.code() != 0 ? res.code() : "No data"));
                     retryOrError(attempt, "Lỗi tải: " + (res.code() != 0 ? res.code() : "Không có dữ liệu"));
                     return;
                 }
@@ -167,36 +170,31 @@ public class ChapterContentActivity extends AppCompatActivity {
                     imageUrls.addAll(urls);
                     imageAdapter.notifyDataSetChanged();
                     setUI(false, true);
+                    Log.d(TAG, "Loaded " + urls.size() + " images for chapter");
                 }
-                setTitle("Chương " + (currentIndex + 1));
             }
 
             @Override
             public void onFailure(Call<ChapterResponse> call, Throwable t) {
-                retryOrError(attempt, t.getMessage());
+                currentCall = null;
+                if (!call.isCanceled()) {
+                    Log.e(TAG, "API failure: " + t.getMessage());
+                    retryOrError(attempt, t.getMessage());
+                }
             }
         });
-    }
-
-    /**
-     * Chuyển đổi chương (trước/sau)
-     */
-    private void navigateChapter(int direction) {
-        if (chapterIds == null || currentIndex + direction < 0 || currentIndex + direction >= chapterIds.size()) {
-            Toast.makeText(this, direction > 0 ? "Không có chương sau" : "Không có chương trước", Toast.LENGTH_SHORT).show();
-            return;
-        }
-        currentIndex += direction;
-        chapterId = chapterIds.get(currentIndex);
-        loadChapter();
     }
 
     /**
      * Thử lại hoặc hiển thị lỗi
      */
     private void retryOrError(int attempt, String msg) {
-        if (attempt < MAX_RETRIES) fetchData(attempt + 1);
-        else showError("Lỗi: " + msg);
+        if (attempt < MAX_RETRIES) {
+            Log.d(TAG, "Retrying API call, attempt: " + (attempt + 1));
+            fetchData(attempt + 1);
+        } else {
+            showError("Lỗi: " + msg);
+        }
     }
 
     /**
@@ -215,5 +213,16 @@ public class ChapterContentActivity extends AppCompatActivity {
         Log.e(TAG, msg);
         setUI(false, false);
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Hủy call khi Activity bị hủy
+        if (currentCall != null) {
+            currentCall.cancel();
+            Log.d(TAG, "Canceled API call on destroy");
+        }
+        overridePendingTransition(0, 0);
     }
 }
