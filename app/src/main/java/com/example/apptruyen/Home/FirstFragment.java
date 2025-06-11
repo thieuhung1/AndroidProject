@@ -1,345 +1,242 @@
-package com.example.apptruyen.Home;
+    package com.example.apptruyen.Home;
 
-import android.content.Context;
-import android.os.Build;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Toast; // Thêm import Toast
+    import android.content.Context;
+    import android.os.Bundle;
+    import android.text.Editable;
+    import android.text.TextWatcher;
+    import android.util.Log;
+    import android.view.LayoutInflater;
+    import android.view.View;
+    import android.view.ViewGroup;
+    import android.widget.EditText;
+    import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+    import androidx.annotation.NonNull;
+    import androidx.annotation.Nullable;
+    import androidx.fragment.app.Fragment;
+    import androidx.recyclerview.widget.LinearLayoutManager;
+    import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.apptruyen.R;
-import com.example.apptruyen.firebase.ComicAdapter;
-import com.example.apptruyen.model.Comic;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+    import com.example.apptruyen.R;
+    import com.example.apptruyen.firebase.ComicAdapter;
+    import com.example.apptruyen.model.Comic;
+    import com.google.firebase.FirebaseApp;
+    import com.google.firebase.firestore.FirebaseFirestore;
+    import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+    import org.json.JSONArray;
+    import org.json.JSONObject;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.HashMap; // Thêm import HashMap cho migrateFirestoreComicIds
+    import java.io.InputStream;
+    import java.nio.charset.StandardCharsets;
+    import java.util.ArrayList;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.stream.Collectors;
+    
+    public class FirstFragment extends Fragment {
 
-public class FirstFragment extends Fragment {
+        private static final String TAG = "FirstFragment"; // Thẻ log
+        private static final String COMICS_JSON_FILE = "comics.json"; // Tệp JSON
+        private static final String FIRESTORE_COLLECTION = "comics"; // Bộ sưu tập Firestore
 
-    private static final String TAG = "FirstFragment";
-    private static final String COMICS_JSON_FILE = "comics.json";
-    private static final String FIRESTORE_COLLECTION = "comics";
+        private ComicAdapter adapter; // Adapter cho RecyclerView
+        private final List<Comic> comicList = new ArrayList<>(); // Danh sách truyện
+        private final List<Comic> filteredComicList = new ArrayList<>(); // Danh sách lọc
+        private FirebaseFirestore db; // Firestore instance
 
-    private RecyclerView recyclerView;
-    private ComicAdapter adapter;
-    private List<Comic> comicList = new ArrayList<>();
-    private FirebaseFirestore db;
-
-    // Cờ để điều khiển việc tải dữ liệu (chỉ dùng cho mục đích phát triển/debug)
-    // Đặt true để ưu tiên JSON, false để ưu tiên Firestore
-    private static final boolean LOAD_FROM_JSON_DEBUG_MODE = false;
-    // Đặt true để tải dữ liệu từ JSON lên Firestore MỘT LẦN (chỉ khi LOAD_FROM_JSON_DEBUG_MODE là true)
-    private static final boolean UPLOAD_JSON_TO_FIRESTORE_ONCE = false;
-
-    // CỜ ĐỂ CHẠY MIGRATION MỘT LẦN (ĐẶT LÀ TRUE, CHẠY, RỒI ĐẶT LẠI LÀ FALSE)
-    private static final boolean RUN_MIGRATION_ONCE = false;
-
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        FirebaseApp.initializeApp(context);
-        db = FirebaseFirestore.getInstance();
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_first, container, false);
-
-        recyclerView = view.findViewById(R.id.newUpdatesRecycler);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new ComicAdapter(getContext(), comicList);
-        recyclerView.setAdapter(adapter);
-
-        // Chạy migration nếu cờ được bật (CHỈ NÊN CHẠY MỘT LẦN)
-        if (RUN_MIGRATION_ONCE) {
-            Log.d(TAG, "Đang chạy migration để sửa lỗi ID Firestore.");
-            migrateFirestoreComicIds();
-            // SAU KHI ĐÃ CHẠY VÀ XÁC NHẬN DỮ LIỆU ĐƯỢC SỬA, HÃY ĐẶT RUN_MIGRATION_ONCE VỀ FALSE
-            // VÀ GỠ BỎ HOẶC COMMENT DÒNG GỌI NÀY ĐỂ TRÁNH CHẠY LẠI KHÔNG CẦN THIẾT.
+        @Override
+        public void onAttach(@NonNull Context context) {
+            super.onAttach(context);
+            FirebaseApp.initializeApp(context); // Khởi tạo Firebase
+            db = FirebaseFirestore.getInstance(); // Khởi tạo Firestore
         }
 
-        // Gọi phương thức tải dữ liệu chính
-        loadComicsData();
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_first, container, false); // Tải layout
+            RecyclerView recyclerView = view.findViewById(R.id.newUpdatesRecycler);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            adapter = new ComicAdapter(getContext(), filteredComicList); // Gắn adapter
+            recyclerView.setAdapter(adapter);
 
-        return view;
-    }
+            // Theo dõi thay đổi văn bản tìm kiếm
+            ((EditText) view.findViewById(R.id.searchEditText)).addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void afterTextChanged(Editable s) { filterComics(s.toString()); }
+            });
 
-    /**
-     * Phương thức chính để quyết định tải dữ liệu từ đâu.
-     * Sử dụng cờ LOAD_FROM_JSON_DEBUG_MODE để chuyển đổi giữa JSON và Firestore.
-     */
-    private void loadComicsData() {
-        if (LOAD_FROM_JSON_DEBUG_MODE) {
-            Log.d(TAG, "Đang tải truyện tranh từ JSON (Chế độ Debug)");
-            try {
-                loadComicsFromJson();
-                // Chỉ upload lên Firestore nếu cờ UPLOAD_JSON_TO_FIRESTORE_ONCE là true
-                // VÀ chỉ khi danh sách truyện không rỗng
-                if (UPLOAD_JSON_TO_FIRESTORE_ONCE && !comicList.isEmpty()) {
-                    Log.d(TAG, "Đang tải dữ liệu từ JSON lên Firestore (Chỉ một lần)");
-                    uploadComicsToFirestore(comicList);
+            loadComics(); // Tải dữ liệu
+            return view;
+        }
+
+        // Lọc truyện theo truy vấn
+        private void filterComics(String query) {
+            filteredComicList.clear();
+            filteredComicList.addAll(query.isEmpty() ? comicList :
+                    comicList.stream().filter(c -> c.name.toLowerCase().contains(query.toLowerCase()) ||
+                                    c.origin_name.toLowerCase().contains(query.toLowerCase()) ||
+                                    c.category.stream().anyMatch(cat -> cat.toLowerCase().contains(query.toLowerCase())))
+                            .collect(Collectors.toList()));
+            adapter.notifyDataSetChanged(); // Cập nhật UI
+            if (!query.isEmpty() && filteredComicList.isEmpty()) showToast("Không tìm thấy truyện");
+        }
+
+        // Tải truyện từ Firestore
+        private void loadComics() {
+            db.collection(FIRESTORE_COLLECTION).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                    updateComicLists(task.getResult()); // Cập nhật danh sách
+                    Log.d(TAG, "✅ Tải " + comicList.size() + " truyện từ Firestore");
+                } else {
+                    error("Firestore", task.getException()); // Xử lý lỗi
+                    loadAndUploadFromJson(); // Tải từ JSON
                 }
+            });
+        }
+
+        // Tải và đẩy dữ liệu từ JSON
+        private void loadAndUploadFromJson() {
+            try {
+                // Đọc JSON từ assets
+                InputStream is = requireContext().getAssets().open(COMICS_JSON_FILE);
+                JSONArray items = new JSONObject(new String(is.readAllBytes(), StandardCharsets.UTF_8))
+                        .getJSONObject("data").getJSONArray("items");
+                is.close();
+
+                comicList.clear();
+                filteredComicList.clear();
+                for (int i = 0; i < items.length(); i++) {
+                    Comic comic = parseJsonComic(items.getJSONObject(i));
+                    comicList.add(comic);
+                    filteredComicList.add(comic);
+                }
+                adapter.notifyDataSetChanged();
+                Log.d(TAG, "✅ Tải " + comicList.size() + " truyện từ JSON");
+
+                uploadComicsToFirestore(); // Đẩy lên Firestore
             } catch (Exception e) {
-                Log.e(TAG, "❌ Lỗi khi tải truyện tranh từ JSON, chuyển sang Firestore.", e);
-                // Nếu JSON lỗi, chuyển sang Firestore làm phương án dự phòng
-                loadComicsFromFirestore();
+                error("JSON", e);
             }
-        } else {
-            Log.d(TAG, "Đang tải truyện tranh từ Firestore.");
-            loadComicsFromFirestore();
         }
-    }
 
-    /**
-     * Tải truyện tranh từ Firestore và cập nhật giao diện.
-     * Xử lý từng trường một cách thủ công để linh hoạt hơn.
-     */
-    private void loadComicsFromFirestore() {
-        db.collection(FIRESTORE_COLLECTION)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        comicList.clear();
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            try {
-                                Comic comic = new Comic();
-                                comic._id = document.getString("_id");
-                                if (comic._id == null || comic._id.isEmpty()) {
-                                    comic._id = document.getId(); // Sử dụng ID của tài liệu Firestore làm fallback
-                                    Log.w(TAG, "⚠️ _id field is missing in document " + document.getId() + ", using document ID as _id.");
-                                }
+        // Đẩy truyện mới lên Firestore
+        private void uploadComicsToFirestore() {
+            if (comicList.isEmpty()) {
+                Log.w(TAG, "⚠️ Danh sách truyện rỗng");
+                return;
+            }
 
-                                comic.name = document.getString("name");
-                                comic.slug = document.getString("slug");
+            db.collection(FIRESTORE_COLLECTION).get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    List<String> existingIds = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : task.getResult()) existingIds.add(doc.getId());
 
-                                Object originNameField = document.get("origin_name");
-                                if (originNameField instanceof List) {
-                                    List<String> originNamesList = (List<String>) originNameField;
-                                    comic.origin_name = (originNamesList != null && !originNamesList.isEmpty()) ? String.join(",", originNamesList) : "";
-                                } else if (originNameField instanceof String) {
-                                    comic.origin_name = (String) originNameField;
-                                } else {
-                                    comic.origin_name = "";
-                                    Log.w(TAG, "Unexpected type for origin_name in document " + document.getId() + ": " + (originNameField != null ? originNameField.getClass().getName() : "null"));
-                                }
-
-                                comic.status = document.getString("status");
-                                comic.thumb_url = document.getString("thumb_url");
-                                comic.updatedAt = document.getString("updatedAt");
-
-                                List<String> categories = new ArrayList<>();
-                                Object categoryField = document.get("category");
-                                if (categoryField instanceof List) {
-                                    List<?> rawCategoryList = (List<?>) categoryField;
-                                    for (Object item : rawCategoryList) {
-                                        if (item instanceof Map) {
-                                            Map<String, Object> catMap = (Map<String, Object>) item;
-                                            if (catMap.containsKey("name") && catMap.get("name") instanceof String) {
-                                                categories.add((String) catMap.get("name"));
-                                            }
-                                        } else if (item instanceof String) {
-                                            categories.add((String) item);
-                                        } else {
-                                            Log.w(TAG, "Unexpected item type in category list for " + document.getId() + ": " + (item != null ? item.getClass().getName() : "null"));
-                                        }
-                                    }
-                                } else if (categoryField instanceof String) {
-                                    categories.add((String) categoryField);
-                                    Log.w(TAG, "Category for " + document.getId() + " is a single String: " + categoryField);
-                                } else if (categoryField != null) {
-                                    Log.w(TAG, "Category field for " + document.getId() + " is not a List or String. Actual type: " + categoryField.getClass().getName());
-                                }
-                                comic.category = categories;
-
-                                Object latestChapterField = document.get("latest_chapter");
-                                if (latestChapterField instanceof Map) {
-                                    Map<String, Object> latestChapterMap = (Map<String, Object>) latestChapterField;
-                                    Comic.Chapter chap = new Comic.Chapter();
-                                    chap.filename = (String) latestChapterMap.get("filename");
-                                    chap.chapter_name = (String) latestChapterMap.get("chapter_name");
-                                    chap.chapter_title = (String) latestChapterMap.get("chapter_title");
-                                    chap.chapter_api_data = (String) latestChapterMap.get("chapter_api_data");
-                                    comic.latest_chapter = chap;
-                                } else if (latestChapterField != null) {
-                                    Log.w(TAG, "latest_chapter for " + document.getId() + " is not a Map. Actual type: " + latestChapterField.getClass().getName() + ". Value: " + latestChapterField);
-                                    comic.latest_chapter = null;
-                                }
-
-                                comicList.add(comic);
-                                Log.d(TAG, "✅ Firestore: " + comic.name);
-                            } catch (Exception e) {
-                                Log.e(TAG, "❌ Lỗi khi phân tích truyện tranh từ Firestore cho tài liệu: " + document.getId(), e);
-                            }
-                        }
-                        adapter.notifyDataSetChanged();
-                    } else {
-                        Log.e(TAG, "❌ Lỗi khi tải truyện tranh từ Firestore", task.getException());
-                        Log.d(TAG, "Thử tải từ JSON do Firestore lỗi.");
-                        try {
-                            loadComicsFromJson();
-                        } catch (Exception eJson) {
-                            Log.e(TAG, "❌ Lỗi khi tải truyện tranh từ JSON sau khi Firestore lỗi.", eJson);
-                            Toast.makeText(getContext(), "Không thể tải truyện từ Firestore hoặc tệp cục bộ.", Toast.LENGTH_LONG).show();
+                    int uploadCount = 0;
+                    for (Comic comic : comicList) {
+                        if (!existingIds.contains(comic._id)) {
+                            db.collection(FIRESTORE_COLLECTION).document(comic._id).set(comic)
+                                    .addOnSuccessListener(v -> Log.d(TAG, "✅ Tải lên: " + comic.name))
+                                    .addOnFailureListener(e -> Log.e(TAG, "❌ Lỗi tải lên: " + comic.name, e));
+                            uploadCount++;
                         }
                     }
-                });
-    }
-
-    /**
-     * Tải truyện tranh từ tệp assets/comics.json.
-     * Phương thức này KHÔNG tự động tải lên Firestore nữa.
-     * Để tải lên Firestore, hãy sử dụng cờ UPLOAD_JSON_TO_FIRESTORE_ONCE.
-     *
-     * @throws Exception nếu đọc hoặc phân tích tệp JSON thất bại
-     */
-    private void loadComicsFromJson() throws Exception {
-        InputStream is = requireContext().getAssets().open(COMICS_JSON_FILE);
-        int size = is.available();
-        byte[] buffer = new byte[size];
-        is.read(buffer);
-        is.close();
-
-        String json = new String(buffer, StandardCharsets.UTF_8);
-        JSONObject root = new JSONObject(json);
-        JSONArray items = root.getJSONObject("data").getJSONArray("items");
-
-        comicList.clear();
-
-        for (int i = 0; i < items.length(); i++) {
-            try {
-                JSONObject obj = items.getJSONObject(i);
-                Comic comic = new Comic();
-
-                comic._id = obj.getString("_id");
-                comic.name = obj.getString("name");
-                comic.slug = obj.getString("slug");
-
-                JSONArray originNameArray = obj.getJSONArray("origin_name");
-                comic.origin_name = originNameArray.join(",").replace("\"", "");
-
-                comic.status = obj.getString("status");
-                comic.thumb_url = obj.getString("thumb_url");
-                comic.updatedAt = obj.getString("updatedAt");
-
-                JSONArray catArray = obj.getJSONArray("category");
-                List<String> categories = new ArrayList<>();
-                for (int j = 0; j < catArray.length(); j++) {
-                    try {
-                        JSONObject catObj = catArray.getJSONObject(j);
-                        categories.add(catObj.getString("name"));
-                    } catch (JSONException e) {
-                        Log.e(TAG, "❌ Lỗi parse category JSON tại chỉ số " + j, e);
-                    }
+                    if (uploadCount > 0) showToast("Đã đẩy " + uploadCount + " truyện lên Firestore");
+                    else Log.d(TAG, "✅ Không có truyện mới");
+                } else {
+                    Log.e(TAG, "❌ Lỗi kiểm tra Firestore", task.getException());
                 }
-                comic.category = categories;
+            });
+        }
 
-                if (obj.has("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
-                    JSONObject chapObj = obj.getJSONArray("chaptersLatest").getJSONObject(0);
-                    Comic.Chapter chap = new Comic.Chapter();
-                    chap.filename = chapObj.optString("filename");
-                    chap.chapter_name = chapObj.optString("chapter_name");
-                    chap.chapter_title = chapObj.optString("chapter_title");
-                    chap.chapter_api_data = chapObj.optString("chapter_api_data");
-                    comic.latest_chapter = chap;
-                }
+        // Phân tích truyện từ JSON
+        private Comic parseJsonComic(JSONObject obj) throws Exception {
+            Comic comic = new Comic();
+            comic._id = obj.getString("_id"); // ID
+            comic.name = obj.getString("name"); // Tên
+            comic.slug = obj.getString("slug"); // Slug
+            comic.origin_name = obj.getJSONArray("origin_name").join(",").replace("\"", ""); // Tên gốc
+            comic.status = obj.getString("status"); // Trạng thái
+            comic.thumb_url = obj.getString("thumb_url"); // Ảnh bìa
+            comic.updatedAt = obj.getString("updatedAt"); // Thời gian cập nhật
+            comic.category = new ArrayList<>();
+            JSONArray cats = obj.getJSONArray("category");
+            for (int i = 0; i < cats.length(); i++) comic.category.add(cats.getJSONObject(i).getString("name")); // Danh mục
 
+            // Xử lý chương mới nhất
+            if (obj.has("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
+                JSONObject chapObj = obj.getJSONArray("chaptersLatest").getJSONObject(0);
+                Comic.Chapter chap = new Comic.Chapter();
+                chap.filename = chapObj.optString("filename");
+                chap.chapter_name = chapObj.optString("chapter_name");
+                chap.chapter_title = chapObj.optString("chapter_title");
+                chap.chapter_api_data = chapObj.optString("chapter_api_data");
+                comic.latest_chapter = chap;
+            }
+            return comic;
+        }
+
+        // Phân tích truyện từ Firestore
+        private Comic parseFirestoreComic(QueryDocumentSnapshot doc) {
+            Comic comic = new Comic();
+            comic._id = doc.getString("_id") != null ? doc.getString("_id") : doc.getId(); // ID
+            comic.name = doc.getString("name"); // Tên
+            comic.slug = doc.getString("slug"); // Slug
+            comic.origin_name = parseStringList(doc.get("origin_name")); // Tên gốc
+            comic.status = doc.getString("status"); // Trạng thái
+            comic.thumb_url = doc.getString("thumb_url"); // Ảnh bìa
+            comic.updatedAt = doc.getString("updatedAt"); // Thời gian cập nhật
+            comic.category = parseCategoryList(doc.get("category")); // Danh mục
+
+            // Xử lý chương mới nhất
+            if (doc.get("latest_chapter") instanceof Map) {
+                Map<String, Object> chapData = (Map<String, Object>) doc.get("latest_chapter");
+                Comic.Chapter chap = new Comic.Chapter();
+                chap.filename = (String) chapData.get("filename");
+                chap.chapter_name = (String) chapData.get("chapter_name");
+                chap.chapter_title = (String) chapData.get("chapter_title");
+                chap.chapter_api_data = (String) chapData.get("chapter_api_data");
+                comic.latest_chapter = chap;
+            }
+            return comic;
+        }
+
+        // Chuyển danh mục thành danh sách chuỗi
+        private List<String> parseCategoryList(Object field) {
+            List<String> list = new ArrayList<>();
+            if (field instanceof List<?>) {
+                for (Object o : (List<?>) field) list.add(o instanceof Map ? (String) ((Map<?, ?>) o).get("name") : (String) o);
+            } else if (field instanceof String) list.add((String) field);
+            return list;
+        }
+
+        // Chuyển origin_name thành chuỗi
+        private String parseStringList(Object field) {
+            return field instanceof List<?> ? String.join(",", (List<String>) field) : "";
+        }
+
+        // Cập nhật danh sách truyện
+        private void updateComicLists(Iterable<QueryDocumentSnapshot> documents) {
+            comicList.clear();
+            filteredComicList.clear();
+            for (QueryDocumentSnapshot doc : documents) {
+                Comic comic = parseFirestoreComic(doc);
                 comicList.add(comic);
-                Log.d(TAG, "✅ JSON: " + comic.name);
-
-            } catch (JSONException e) {
-                Log.e(TAG, "❌ Lỗi khi parse comic từ JSON tại chỉ số " + i, e);
-            } catch (Exception e) {
-                Log.e(TAG, "❌ Lỗi không mong muốn khi parse comic từ JSON tại chỉ số " + i, e);
+                filteredComicList.add(comic);
             }
+            adapter.notifyDataSetChanged();
         }
 
-        adapter.notifyDataSetChanged();
-    }
+        // Xử lý lỗi
+        private void error(String source, Exception e) {
+            Log.e(TAG, "Lỗi tải từ " + source, e);
+            showToast("Lỗi tải dữ liệu từ " + source);
+        }
 
-    /**
-     * Tải danh sách truyện tranh lên Firestore.
-     * Phương thức này không tự động gọi nữa, mà được gọi thủ công (ví dụ: từ loadComicsData
-     * khi UPLOAD_JSON_TO_FIRESTORE_ONCE là true).
-     */
-    private void uploadComicsToFirestore(List<Comic> comics) {
-        for (Comic comic : comics) {
-            if (comic._id == null || comic._id.isEmpty()) {
-                Log.w(TAG, "Bỏ qua upload comic không có ID: " + comic.name);
-                continue;
-            }
-            db.collection(FIRESTORE_COLLECTION)
-                    .document(comic._id)
-                    .set(comic)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "✅ Upload Firestore: " + comic.name))
-                    .addOnFailureListener(e -> Log.e(TAG, "❌ Upload Firestore lỗi: " + comic.name, e));
+        // Hiển thị Toast
+        private void showToast(String message) {
+            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
         }
     }
-
-    /**
-     * Phương thức này quét các tài liệu Firestore trong bộ sưu tập "comics"
-     * và cập nhật trường "_id" bên trong tài liệu để khớp với ID tài liệu.
-     * CHỈ NÊN CHẠY MỘT LẦN hoặc dưới sự kiểm soát chặt chẽ.
-     */
-    private void migrateFirestoreComicIds() {
-        db.collection(FIRESTORE_COLLECTION)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        int updatedCount = 0;
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String documentId = document.getId();
-                            String fieldId = document.getString("_id");
-
-                            // Nếu trường _id bị thiếu, null, rỗng hoặc không khớp với ID tài liệu
-                            if (fieldId == null || fieldId.isEmpty() || !fieldId.equals(documentId)) {
-                                Log.d(TAG, "Cần cập nhật _id cho tài liệu: " + documentId + ". Current _id field: '" + fieldId + "'");
-                                Map<String, Object> updates = new HashMap<>();
-                                updates.put("_id", documentId); // Đặt trường _id bằng ID của tài liệu
-
-                                document.getReference().update(updates)
-                                        .addOnSuccessListener(aVoid -> {
-                                            Log.d(TAG, "✅ Đã cập nhật _id cho tài liệu: " + documentId);
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Log.e(TAG, "❌ Lỗi cập nhật _id cho tài liệu: " + documentId, e);
-                                        });
-                                updatedCount++;
-                            }
-                        }
-                        if (updatedCount > 0) {
-                            Toast.makeText(getContext(), "Đã quét và cập nhật " + updatedCount + " tài liệu.", Toast.LENGTH_LONG).show();
-                        } else {
-                            Toast.makeText(getContext(), "Không tìm thấy tài liệu nào cần cập nhật _id.", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        Log.e(TAG, "❌ Lỗi khi tải tài liệu để migration", task.getException());
-                        Toast.makeText(getContext(), "Lỗi khi chạy migration.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-}

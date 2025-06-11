@@ -3,125 +3,100 @@ package com.example.apptruyen.register;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Patterns;
-import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import com.example.apptruyen.R;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class register extends AppCompatActivity {
-
-    EditText usernameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
-    Button signupbt1;
-    TextView Loginview1;
-    ImageView eyeToggle;
-    FirebaseFirestore firestore;
-    private boolean passwordVisible = false;
+    private EditText usernameEditText, emailEditText, passwordEditText, confirmPasswordEditText;
+    private ImageView eyeToggle;
+    private boolean passwordVisible;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        /// Ánh xạ các view
-        usernameEditText = findViewById(R.id.usernameEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
-        confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
-        emailEditText = findViewById(R.id.emailEditText);
-        signupbt1 = findViewById(R.id.signupButton);
-        Loginview1 = findViewById(R.id.Loginview1);
-        eyeToggle = findViewById(R.id.passwordToggle); // Đảm bảo ID đúng trong XML
+        initViews();
+        db = FirebaseFirestore.getInstance();
 
-        firestore = FirebaseFirestore.getInstance();
+        eyeToggle.setOnClickListener(v -> togglePasswordVisibility());
+        findViewById(R.id.signupButton).setOnClickListener(v -> registerUser());
+        findViewById(R.id.Loginview1).setOnClickListener(v -> finish());
 
-        /// Xử lý ẩn/hiện mật khẩu
-        eyeToggle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                passwordVisible = !passwordVisible;
-                if (passwordVisible) {
-                    passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                    confirmPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                    eyeToggle.setImageResource(R.drawable.eye_close); // icon mắt đóng
-                } else {
-                    passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    confirmPasswordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                    eyeToggle.setImageResource(R.drawable.eye_open); // icon mắt mở
-                }
-                passwordEditText.setSelection(passwordEditText.getText().length());
-                confirmPasswordEditText.setSelection(confirmPasswordEditText.getText().length());
-            }
-        });
-
-        /// Xử lý lề hệ thống (đối với edge-to-edge layout)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.signup_main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            Insets bars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
             return insets;
         });
+    }
 
-        /// Xử lý nút Đăng ký
-        signupbt1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String username = usernameEditText.getText().toString().trim();
-                String email = emailEditText.getText().toString().trim();
-                String password = passwordEditText.getText().toString().trim();
-                String confirm = confirmPasswordEditText.getText().toString().trim();
+    private void initViews() {
+        usernameEditText = findViewById(R.id.usernameEditText);
+        emailEditText = findViewById(R.id.emailEditText);
+        passwordEditText = findViewById(R.id.passwordEditText);
+        confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
+        eyeToggle = findViewById(R.id.passwordToggle);
+    }
 
-                // Kiểm tra dữ liệu đầu vào
-                if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                    Toast.makeText(register.this, "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+    private void togglePasswordVisibility() {
+        passwordVisible = !passwordVisible;
+        int inputType = passwordVisible ?
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD :
+                InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD;
 
-                if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    Toast.makeText(register.this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        passwordEditText.setInputType(inputType);
+        confirmPasswordEditText.setInputType(inputType);
+        eyeToggle.setImageResource(passwordVisible ? R.drawable.eye_close : R.drawable.eye_open);
 
-                if (!password.equals(confirm)) {
-                    Toast.makeText(register.this, "Mật khẩu xác nhận không khớp", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        passwordEditText.setSelection(passwordEditText.length());
+        confirmPasswordEditText.setSelection(confirmPasswordEditText.length());
+    }
 
-                // Tạo Map user để lưu vào Firestore
-                Map<String, Object> user = new HashMap<>();
-                user.put("username", username);
-                user.put("email", email);
-                user.put("password", password); // Gợi ý: Nên mã hóa mật khẩu trong sản phẩm thật
+    private void registerUser() {
+        String username = usernameEditText.getText().toString().trim();
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
+        String confirm = confirmPasswordEditText.getText().toString().trim();
 
-                firestore.collection("users")
-                        .document(username)
-                        .set(user)
-                        .addOnSuccessListener(aVoid -> {
-                            Toast.makeText(register.this, "Đăng ký thành công!", Toast.LENGTH_SHORT).show();
-                            finish(); // Quay lại màn hình đăng nhập
-                        })
-                        .addOnFailureListener(e -> {
-                            Toast.makeText(register.this, "Đăng ký thất bại: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        });
-            }
-        });
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+            showToast("Vui lòng nhập đầy đủ thông tin");
+            return;
+        }
 
-        /// Xử lý "Đã có tài khoản? Đăng nhập"
-        Loginview1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish(); // Đóng activity này, quay lại Login
-            }
-        });
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showToast("Email không hợp lệ");
+            return;
+        }
+
+        if (!password.equals(confirm)) {
+            showToast("Mật khẩu xác nhận không khớp");
+            return;
+        }
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("username", username);
+        user.put("email", email);
+        user.put("password", password); // TODO: Hash password before storing
+
+        db.collection("users").document(username).set(user)
+                .addOnSuccessListener(a -> {
+                    showToast("Đăng ký thành công!");
+                    finish();
+                })
+                .addOnFailureListener(e -> showToast("Đăng ký thất bại: " + e.getMessage()));
+    }
+
+    private void showToast(String msg) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

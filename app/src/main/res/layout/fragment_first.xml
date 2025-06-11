@@ -6,13 +6,11 @@
     android:layout_height="match_parent"
     tools:context=".Home.FirstFragment">
 
-    <!-- Dùng LinearLayout để xếp AppBar và ScrollView theo chiều dọc -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- AppBarLayout nằm ở trên -->
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
@@ -28,7 +26,32 @@
                 app:titleTextColor="@color/white" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Nội dung bên dưới cuộn được -->
+        <!-- START: Thêm phần tìm kiếm ở đây -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@color/white"> <!-- Đặt màu nền cho CardView -->
+
+            <EditText
+                android:id="@+id/searchEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Tìm kiếm truyện..."
+                android:padding="12dp"
+                android:drawableStart="@drawable/ic_search"
+                android:drawablePadding="8dp"
+                android:background="@android:color/transparent"
+                android:singleLine="true"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:textColor="@color/black"
+                android:textColorHint="@color/black" />
+        </androidx.cardview.widget.CardView>
+        <!-- END: Phần tìm kiếm -->
+
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -41,14 +64,13 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
-                <!-- Banner Slider -->
+                <!-- Banner -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:layout_marginBottom="16dp"
                     app:cardCornerRadius="8dp"
                     app:cardElevation="4dp">
-
                     <ImageView
                         android:id="@+id/bannerImage"
                         android:layout_width="match_parent"
@@ -58,7 +80,7 @@
                         android:contentDescription="Banner truyện" />
                 </androidx.cardview.widget.CardView>
 
-                <!-- Section: Mới Cập Nhật -->
+                <!-- Mới Cập Nhật -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -102,7 +124,7 @@
                         tools:listitem="@layout/item_comic_horizontal" />
                 </LinearLayout>
 
-                <!-- Section: Phổ Biến -->
+                <!-- Phổ Biến -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -146,7 +168,7 @@
                         tools:listitem="@layout/item_comic_horizontal" />
                 </LinearLayout>
 
-                <!-- Section: Thể Loại -->
+                <!-- Thể Loại -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -187,7 +209,7 @@
                         tools:listitem="@layout/item_comic_horizontal" />
                 </LinearLayout>
 
-                <!-- Section: Gợi Ý Cho Bạn -->
+                <!-- Gợi Ý Cho Bạn -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -211,9 +233,19 @@
                         app:spanCount="3"
                         tools:listitem="@layout/item_comic_vertical" />
                 </LinearLayout>
-
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
     </LinearLayout>
+
+    <!-- ⏳ Loading Indicator -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="200dp"
+        android:visibility="gone"
+        android:indeterminate="true" />
 
 </FrameLayout>

@@ -18,17 +18,16 @@
             android:text="Truyện đã yêu thích"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
+            android:textColor="@android:color/white"
             android:layout_marginBottom="16dp"
             android:gravity="center_horizontal" />
 
         <!-- RecyclerView để hiển thị danh sách truyện đã yêu thích -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerLikedComics"
+            android:id="@+id/recyclerLC"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:listitem="@layout/item_comic_liked" />
 
     </LinearLayout>
-
 </FrameLayout>

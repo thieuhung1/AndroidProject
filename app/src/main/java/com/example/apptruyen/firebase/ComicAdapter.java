@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.example.apptruyen.Home.ChapterDetail;
 import com.example.apptruyen.R;
 import com.example.apptruyen.model.Comic;
@@ -23,10 +22,9 @@ import com.example.apptruyen.model.Comic;
 import java.util.List;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHolder> {
-
     private static final String TAG = "ComicAdapter";
-    private Context context;
-    private List<Comic> comics;
+    private final Context context;
+    private final List<Comic> comics;
 
     public ComicAdapter(Context context, List<Comic> comics) {
         this.context = context;
@@ -42,47 +40,35 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ComicViewHolder holder, int position) {
-        try {
-            Comic comic = comics.get(position);
-            holder.textName.setText(comic.name+comic._id );
-            holder.textStatus.setText(comic.status);
+        Comic comic = comics.get(position);
+        holder.textName.setText(comic.name + " (" + comic._id + ")");
+        holder.textStatus.setText(comic.status);
 
-            // Cải thiện cách load hình ảnh với Glide
-            String imageUrl = "https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url;
-            RequestOptions options = new RequestOptions()
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .centerCrop()
-                    .override(300, 450); // Giới hạn kích thước hình ảnh
+        Glide.with(context)
+                .load("https://img.otruyenapi.com/uploads/comics/" + comic.thumb_url)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .centerCrop()
+                .override(300, 450)
+                .into(holder.imageThumb);
 
-            Glide.with(context)
-                    .load(imageUrl)
-                    .apply(options)
-                    .into(holder.imageThumb);
+        holder.itemView.setOnClickListener(v -> openComicDetails(comic));
+    }
 
-            holder.itemView.setOnClickListener(v -> {
-                try {
-                    Intent intent = new Intent(context, ChapterDetail.class);
-                    intent.putExtra("comicId", comic._id);
-                    intent.putExtra("slug", comic.slug);// Truyền ID thay vì cả object
-                    context.startActivity(intent);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error opening comic details", e);
-                    Toast.makeText(context, "Không thể mở chi tiết truyện", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (Exception e) {
-            Log.e(TAG, "Error binding view holder", e);
-        }
+    private void openComicDetails(Comic comic) {
+        Intent intent = new Intent(context, ChapterDetail.class);
+        intent.putExtra("comicId", comic._id);
+        intent.putExtra("slug", comic.slug);
+        context.startActivity(intent);
     }
 
     @Override
     public int getItemCount() {
-        return comics != null ? comics.size() : 0;
+        return comics.size();
     }
 
     public static class ComicViewHolder extends RecyclerView.ViewHolder {
-        ImageView imageThumb;
-        TextView textName, textStatus;
+        final ImageView imageThumb;
+        final TextView textName, textStatus;
 
         public ComicViewHolder(@NonNull View itemView) {
             super(itemView);

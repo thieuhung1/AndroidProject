@@ -11,12 +11,31 @@
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:background="#7B5BBF"
-        android:title="Tên truyện"
-        android:titleTextColor="@android:color/white"
-        android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.MaterialComponents.Light" />
+        android:titleTextColor="@android:color/white">
+        <!-- Thêm ImageView vào toolbar -->
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:padding="12dp"
+            android:src="@drawable/ic_back"
+            android:tint="@android:color/white"
+            android:contentDescription="Back"
+            android:clickable="true"
+            android:focusable="true"/>
+        <TextView
+            android:id="@+id/toolbarTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TRUYỆN TRANH "
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_gravity="center"/>
+    </com.google.android.material.appbar.MaterialToolbar>
 
     <!-- Nội dung cuộn -->
     <ScrollView
@@ -40,8 +59,7 @@
                     android:id="@+id/imgBiaTruyen"
                     android:layout_width="120dp"
                     android:layout_height="180dp"
-                    android:scaleType="centerCrop"
-                    />
+                    android:scaleType="centerCrop" />
 
                 <LinearLayout
                     android:orientation="vertical"
@@ -101,8 +119,8 @@
                 <Button
                     android:id="@+id/btnDocTruyen"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:layout_height="wrap_content"
                     android:text="Đọc từ đầu"
                     android:textAllCaps="false"
                     android:textSize="16sp"
@@ -122,8 +140,11 @@
                     android:layout_height="40dp"
                     android:src="@drawable/ic_like"
                     android:contentDescription="Yêu thích truyện"
-                    android:padding="4dp" />
+                    android:padding="4dp"
+                    android:clickable="true"
+                    android:focusable="true" />
             </LinearLayout>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"

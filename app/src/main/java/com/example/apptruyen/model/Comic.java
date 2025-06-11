@@ -16,6 +16,8 @@ public class Comic implements Serializable {
     public String updatedAt;
     public List<String> category;
     public Chapter latest_chapter;
+    public String author;
+    public String description;
 
     public static class Chapter implements Serializable {
         public String filename;

@@ -1,102 +1,98 @@
 package com.example.apptruyen.Login;
 
-import static android.app.ProgressDialog.show;
-
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
+import android.text.TextUtils;
+import android.text.method.HideReturnsTransformationMethod;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.apptruyen.Home.Home;
 import com.example.apptruyen.R;
 import com.example.apptruyen.register.register;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Login extends AppCompatActivity {
-
-    private Button loginbt, signupbt;
+    private EditText emailEditText, passwordEditText;
     private ImageView eyeToggle;
-    private EditText passwordEditText, emailEditText;
-    private boolean passwordShowing = false;
-
-    private FirebaseFirestore firestore;
+    private Button loginButton;
+    private boolean passwordVisible;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        initViews();
+        db = FirebaseFirestore.getInstance();
+
+        eyeToggle.setOnClickListener(v -> togglePasswordVisibility());
+        findViewById(R.id.signupButton).setOnClickListener(v -> startActivity(new Intent(this, register.class)));
+        loginButton.setOnClickListener(v -> attemptLogin());
+    }
+
+    private void initViews() {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
-        loginbt = findViewById(R.id.loginButton);
-        signupbt = findViewById(R.id.signupButton);
         eyeToggle = findViewById(R.id.eyeopen);
+        loginButton = findViewById(R.id.loginButton);
+    }
 
-        firestore = FirebaseFirestore.getInstance();
+    private void togglePasswordVisibility() {
+        passwordVisible = !passwordVisible;
+        passwordEditText.setTransformationMethod(passwordVisible ?
+                HideReturnsTransformationMethod.getInstance() :
+                PasswordTransformationMethod.getInstance());
+        eyeToggle.setImageResource(passwordVisible ? R.drawable.eye_close : R.drawable.eye_open);
+        passwordEditText.setSelection(passwordEditText.length());
+    }
 
-        /// Xử lý ẩn/hiện mật khẩu
-        eyeToggle.setOnClickListener(v -> {
-            passwordShowing = !passwordShowing;
-            if (passwordShowing) {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                eyeToggle.setImageResource(R.drawable.eye_close);
-            } else {
-                passwordEditText.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                eyeToggle.setImageResource(R.drawable.eye_open);
-            }
-            passwordEditText.setSelection(passwordEditText.getText().length());
-        });
+    private void attemptLogin() {
+        String email = emailEditText.getText().toString().trim();
+        String password = passwordEditText.getText().toString().trim();
 
-        /// Mở màn đăng ký
-        signupbt.setOnClickListener(v -> {
-            startActivity(new Intent(Login.this, register.class));
-        });
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            showToast("Vui lòng nhập đầy đủ thông tin");
+            return;
+        }
 
-        /// Xử lý đăng nhập từ Firestore
-        loginbt.setOnClickListener(v -> {
-            String email = emailEditText.getText().toString().trim();
-            String password = passwordEditText.getText().toString().trim();
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            showToast("Email không hợp lệ");
+            return;
+        }
 
-            if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(Login.this, "Vui lòng nhập đầy đủ email và mật khẩu", Toast.LENGTH_SHORT).show();
-                return;
-            }
+        setLoading(true);
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .addOnSuccessListener(docs -> {
+                    setLoading(false);
+                    if (!docs.isEmpty() && password.equals(docs.getDocuments().get(0).getString("password"))) {
+                        showToast("Đăng nhập thành công");
+                        startActivity(new Intent(this, Home.class));
+                        finish();
+                    } else {
+                        showToast(docs.isEmpty() ? "Email chưa được đăng ký" : "Sai mật khẩu");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    showToast("Lỗi: " + e.getMessage());
+                });
+    }
 
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                Toast.makeText(Login.this, "Email không hợp lệ", Toast.LENGTH_SHORT).show();
-                return;
-            }
+    private void setLoading(boolean loading) {
+        loginButton.setEnabled(!loading);
+        loginButton.setText(loading ? "Đang đăng nhập..." : "Đăng nhập");
+    }
 
-            // Kiểm tra trong Firestore
-            firestore.collection("users")
-                    .whereEqualTo("email", email)
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
-                            String storedPassword = document.getString("password");
-
-                            if (storedPassword != null && storedPassword.equals(password)) {
-                                Toast.makeText(Login.this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-                                startActivity(new Intent(Login.this, Home.class));
-                                finish();
-                            } else {
-                                Toast.makeText(Login.this, "Sai mật khẩu", Toast.LENGTH_SHORT).show();
-                            }
-                        } else {
-                            Toast.makeText(Login.this, "Email chưa được đăng ký", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(Login.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        });
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

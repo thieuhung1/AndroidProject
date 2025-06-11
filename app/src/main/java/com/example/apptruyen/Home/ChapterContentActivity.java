@@ -6,7 +6,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,186 +17,203 @@ import com.example.apptruyen.R;
 import com.example.apptruyen.api.ApiService;
 import com.example.apptruyen.api.ChapterResponse;
 import com.example.apptruyen.firebase.ImageAdapter;
-
-import java.net.SocketTimeoutException;
+import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import java.util.concurrent.TimeUnit;
-import okhttp3.OkHttpClient;
 
+/**
+ * Activity hiển thị nội dung chương truyện với ảnh chất lượng cao.
+ */
 public class ChapterContentActivity extends AppCompatActivity {
-    private static final String TAG = "ChapterContentActivity";
+    private static final String TAG = "ChapterContent";
+    private static final String BASE_URL = "https://sv1.otruyencdn.com/";
+    private static final int TIMEOUT = 15, MAX_RETRIES = 2;
+
     private ProgressBar progressBar;
     private RecyclerView recyclerImages;
     private TextView tvNoContent;
-    private Toolbar toolbar;
+    private MaterialButton btnPrevChapter, btnNextChapter;
+    private final List<String> imageUrls = new ArrayList<>();
     private ImageAdapter imageAdapter;
-    private List<String> imageUrls = new ArrayList<>();
     private ApiService apiService;
+    private String chapterId;
+    private ArrayList<String> chapterIds;
+    private int currentIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chapter_content);
 
-        initializeViews();
-        setupToolbar();
+        initViews();
         setupRecyclerView();
-        initializeRetrofit();
+        setupRetrofit();
 
-        String chapterId = getIntent().getStringExtra("chapter_id");
-        String chapterName = getIntent().getStringExtra("chapter_name");
-        String chapterTitle = getIntent().getStringExtra("chapter_title");
+        // Lấy dữ liệu từ Intent
+        chapterIds = getIntent().getStringArrayListExtra("chapter_ids");
+        currentIndex = getIntent().getIntExtra("current_index", -1);
+        chapterId = getIntent().getStringExtra("chapter_id");
+
+        if (chapterIds != null && currentIndex >= 0 && currentIndex < chapterIds.size()) {
+            chapterId = chapterIds.get(currentIndex);
+        }
 
         if (chapterId == null || chapterId.isEmpty()) {
-            showError("Invalid chapter ID");
+            showError("ID chương không hợp lệ");
             finish();
             return;
         }
-
-        setToolbarTitle(chapterTitle, chapterName);
-        loadChapterContent(chapterId);
+        loadChapter();
     }
 
-    private void initializeViews() {
+    /**
+     * Khởi tạo giao diện và sự kiện nút
+     */
+    private void initViews() {
         progressBar = findViewById(R.id.progressBar);
         recyclerImages = findViewById(R.id.recyclerImages);
         tvNoContent = findViewById(R.id.tvNoContent);
-        toolbar = findViewById(R.id.toolbar);
-        Button retryButton = findViewById(R.id.retryButton);
-        retryButton.setOnClickListener(v -> loadChapterContent(getIntent().getStringExtra("chapter_id")));
-    }
-
-    private void setupToolbar() {
+        btnPrevChapter = findViewById(R.id.btnPrevChapter);
+        btnNextChapter = findViewById(R.id.btnNextChapter);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            toolbar.setNavigationOnClickListener(v -> finish());
-        }
+        toolbar.setNavigationOnClickListener(v -> finish());
+
+        findViewById(R.id.retryButton).setOnClickListener(v -> loadChapter());
+        btnPrevChapter.setOnClickListener(v -> navigateChapter(-1));
+        btnNextChapter.setOnClickListener(v -> navigateChapter(1));
     }
 
+    /**
+     * Thiết lập RecyclerView để hiển thị ảnh
+     */
     private void setupRecyclerView() {
-        recyclerImages.setHasFixedSize(true);
         recyclerImages.setLayoutManager(new LinearLayoutManager(this));
         imageAdapter = new ImageAdapter(imageUrls);
         recyclerImages.setAdapter(imageAdapter);
     }
 
-    private void initializeRetrofit() {
+    /**
+     * Thiết lập Retrofit với cache OkHttp
+     */
+    private void setupRetrofit() {
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024)) // 20MB cache
+                .retryOnConnectionFailure(true)
                 .build();
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://sv1.otruyencdn.com/")
+
+        apiService = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        apiService = retrofit.create(ApiService.class);
+                .build()
+                .create(ApiService.class);
     }
 
-    private void setToolbarTitle(String chapterTitle, String chapterName) {
-        String title = (chapterTitle != null && !chapterTitle.isEmpty()) ? chapterTitle : "Chapter " + chapterName;
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setTitle(title);
-        }
-    }
-
+    /**
+     * Kiểm tra kết nối mạng
+     */
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        NetworkInfo n = cm.getActiveNetworkInfo();
+        return n != null && n.isConnected();
     }
 
-    private void loadChapterContent(String chapterId) {
+    /**
+     * Tải nội dung chương
+     */
+    private void loadChapter() {
         if (!isNetworkAvailable()) {
-            showError("No network connection");
+            showError("Không có kết nối mạng");
             return;
         }
-        Log.d(TAG, "Loading chapter with ID: " + chapterId + ", Network: " +
-                (isNetworkAvailable() ? "Connected" : "Disconnected"));
-        setUIState(true, false);
-        retryRequest(chapterId, 3, 0);
+        setUI(true, false);
+        fetchData(0);
     }
 
-    private void retryRequest(String chapterId, int maxRetries, int attempt) {
-        if (attempt >= maxRetries) {
-            showError("Failed to load chapter after " + maxRetries + " attempts");
-            return;
-        }
-        apiService.getChapterContent(chapterId).enqueue(new Callback<ChapterResponse>() {
+    /**
+     * Gọi API lấy URL ảnh
+     */
+    private void fetchData(int attempt) {
+        apiService.getChapterContent(chapterId).enqueue(new retrofit2.Callback<ChapterResponse>() {
             @Override
-            public void onResponse(Call<ChapterResponse> call, Response<ChapterResponse> response) {
-                if (isFinishing()) return;
-                handleResponse(response);
+            public void onResponse(Call<ChapterResponse> call, retrofit2.Response<ChapterResponse> res) {
+                if (!res.isSuccessful() || res.body() == null || !"success".equalsIgnoreCase(res.body().status)) {
+                    retryOrError(attempt, "Lỗi tải: " + (res.code() != 0 ? res.code() : "Không có dữ liệu"));
+                    return;
+                }
+
+                List<String> urls = Optional.ofNullable(res.body().data.item.chapterImage)
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(i -> res.body().data.domainCdn + "/" + res.body().data.item.chapterPath + "/" + i.imageFile)
+                        .filter(u -> u != null && !u.isEmpty())
+                        .collect(Collectors.toList());
+
+                if (urls.isEmpty()) {
+                    showError("Không tìm thấy ảnh");
+                } else {
+                    imageUrls.clear();
+                    imageUrls.addAll(urls);
+                    imageAdapter.notifyDataSetChanged();
+                    setUI(false, true);
+                }
+                setTitle("Chương " + (currentIndex + 1));
             }
 
             @Override
             public void onFailure(Call<ChapterResponse> call, Throwable t) {
-                if (!isFinishing()) {
-                    Log.e(TAG, "Attempt " + (attempt + 1) + " failed: " + t.getMessage());
-                    if (t instanceof SocketTimeoutException) {
-                        retryRequest(chapterId, maxRetries, attempt + 1);
-                    } else {
-                        showError("Error: " + t.getMessage());
-                    }
-                }
+                retryOrError(attempt, t.getMessage());
             }
         });
     }
 
-    private void handleResponse(Response<ChapterResponse> response) {
-        setUIState(false, false);
-        if (!response.isSuccessful()) {
-            showError("API error: HTTP " + response.code());
+    /**
+     * Chuyển đổi chương (trước/sau)
+     */
+    private void navigateChapter(int direction) {
+        if (chapterIds == null || currentIndex + direction < 0 || currentIndex + direction >= chapterIds.size()) {
+            Toast.makeText(this, direction > 0 ? "Không có chương sau" : "Không có chương trước", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        ChapterResponse chapterResponse = response.body();
-        if (chapterResponse == null || !"success".equalsIgnoreCase(chapterResponse.status)) {
-            showError(chapterResponse != null ? chapterResponse.message : "Unknown error");
-            return;
-        }
-
-        List<String> newImageUrls = chapterResponse.data.item.chapterImage != null
-                ? chapterResponse.data.item.chapterImage.stream()
-                .filter(image -> image.imageFile != null && !image.imageFile.isEmpty())
-                .map(image -> chapterResponse.data.domainCdn + "/" +
-                        chapterResponse.data.item.chapterPath + "/" +
-                        image.imageFile)
-                .collect(Collectors.toList())
-                : new ArrayList<>();
-
-        if (newImageUrls.isEmpty()) {
-            showError("No images found");
-        } else {
-            updateImages(newImageUrls);
-        }
+        currentIndex += direction;
+        chapterId = chapterIds.get(currentIndex);
+        loadChapter();
     }
 
-    private void updateImages(List<String> newImageUrls) {
-        imageUrls.clear();
-        imageUrls.addAll(newImageUrls);
-        imageAdapter.notifyDataSetChanged();
-        setUIState(false, true);
+    /**
+     * Thử lại hoặc hiển thị lỗi
+     */
+    private void retryOrError(int attempt, String msg) {
+        if (attempt < MAX_RETRIES) fetchData(attempt + 1);
+        else showError("Lỗi: " + msg);
     }
 
-    private void setUIState(boolean isLoading, boolean hasContent) {
-        progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-        recyclerImages.setVisibility(hasContent ? View.VISIBLE : View.GONE);
-        findViewById(R.id.errorLayout).setVisibility(!isLoading && !hasContent ? View.VISIBLE : View.GONE);
+    /**
+     * Cập nhật giao diện
+     */
+    private void setUI(boolean loading, boolean showImages) {
+        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        recyclerImages.setVisibility(showImages ? View.VISIBLE : View.GONE);
+        findViewById(R.id.errorLayout).setVisibility(!loading && !showImages ? View.VISIBLE : View.GONE);
     }
 
-    private void showError(String message) {
-        Log.e(TAG, message);
-        setUIState(false, false);
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    /**
+     * Hiển thị thông báo lỗi
+     */
+    private void showError(String msg) {
+        Log.e(TAG, msg);
+        setUI(false, false);
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

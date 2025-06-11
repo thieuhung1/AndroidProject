@@ -11,9 +11,17 @@ import com.bumptech.glide.module.AppGlideModule;
 public class MyAppGlideModule extends AppGlideModule {
     @Override
     public void applyOptions(Context context, GlideBuilder builder) {
+        // Tính toán kích thước bộ nhớ cache dựa trên kích thước màn hình
         MemorySizeCalculator calculator = new MemorySizeCalculator.Builder(context)
-                .setMemoryCacheScreens(2)
+                .setMemoryCacheScreens(2) // Sử dụng bộ nhớ cache cho 2 màn hình
                 .build();
+
+        // Thiết lập bộ nhớ cache cho Glide
         builder.setMemoryCache(new LruResourceCache(calculator.getMemoryCacheSize()));
+    }
+
+    @Override
+    public boolean isManifestParsingEnabled() {
+        return false; // Tắt phân tích manifest để tăng tốc độ khởi động
     }
 }
