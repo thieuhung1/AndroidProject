@@ -105,7 +105,7 @@
         app:elevation="8dp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPrevChapter"
+            android:id="@+id/btnPreviousChapter"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

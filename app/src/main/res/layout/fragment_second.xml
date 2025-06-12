@@ -5,8 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ececec"
-    tools:context=".MainActivity">
+    android:background="#ececec">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -63,7 +62,7 @@
                 android:layout_marginTop="16dp">
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/button"
+                    android:id="@+id/buttons"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="32dp"

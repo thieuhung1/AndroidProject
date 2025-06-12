@@ -1,6 +1,7 @@
 package com.example.apptruyen.Login;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.text.method.HideReturnsTransformationMethod;
@@ -10,7 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.apptruyen.Home.Home;
 import com.example.apptruyen.R;
 import com.example.apptruyen.register.register;
@@ -74,7 +77,16 @@ public class Login extends AppCompatActivity {
                 .addOnSuccessListener(docs -> {
                     setLoading(false);
                     if (!docs.isEmpty() && password.equals(docs.getDocuments().get(0).getString("password"))) {
+                        // Lấy username từ document
+                        String username = docs.getDocuments().get(0).getString("username");
+
+                        // ✅ Lưu username vào SharedPreferences
+                        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+                        prefs.edit().putString("username", username).apply();
+
                         showToast("Đăng nhập thành công");
+
+                        // Chuyển sang Home
                         startActivity(new Intent(this, Home.class));
                         finish();
                     } else {

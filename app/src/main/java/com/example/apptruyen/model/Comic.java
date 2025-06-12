@@ -18,6 +18,7 @@ public class Comic implements Serializable {
     public Chapter latest_chapter;
     public String author;
     public String description;
+    public List<Chapter> chapters; // Thêm danh sách chương
 
     public static class Chapter implements Serializable {
         public String filename;

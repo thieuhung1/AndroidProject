@@ -42,12 +42,14 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore:25.1.4")
     implementation("com.google.firebase:firebase-auth:23.2.0")
     implementation("com.google.firebase:firebase-messaging:24.1.1")
+    implementation ("com.google.firebase:firebase-storage:21.0.2")
     implementation(libs.firebase.database)
 
     // Authentication
     implementation("androidx.credentials:credentials:1.5.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+    implementation ("at.favre.lib:bcrypt:0.9.0")
 
     // AndroidX
     implementation("androidx.drawerlayout:drawerlayout:1.1.1")
@@ -67,6 +69,7 @@ dependencies {
     // Image Loading
     implementation("com.github.bumptech.glide:glide:4.16.0")
     implementation("com.github.bumptech.glide:okhttp3-integration:4.16.0")
+    implementation(libs.navigation.ui)
     annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
     implementation("com.squareup.picasso:picasso:2.71828")
 

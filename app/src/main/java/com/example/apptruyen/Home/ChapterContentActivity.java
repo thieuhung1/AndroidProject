@@ -43,7 +43,6 @@ public class ChapterContentActivity extends AppCompatActivity {
     private ImageAdapter imageAdapter;
     private ApiService apiService;
     private String chapterId;
-    private Call<ChapterResponse> currentCall; // Lưu call hiện tại để hủy
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +53,8 @@ public class ChapterContentActivity extends AppCompatActivity {
         setupRecyclerView();
         setupRetrofit();
 
-        // Lấy chapterId từ Intent
+        // Lấy dữ liệu từ Intent
         chapterId = getIntent().getStringExtra("chapter_id");
-
-        // Debug Intent
-        Log.d(TAG, "Intent data: chapterId=" + chapterId);
 
         if (chapterId == null || chapterId.isEmpty()) {
             showError("ID chương không hợp lệ");
@@ -80,9 +76,6 @@ public class ChapterContentActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
 
         findViewById(R.id.retryButton).setOnClickListener(v -> loadChapter());
-
-        // Tắt animation mặc định khi chuyển Activity
-        overridePendingTransition(0, 0);
     }
 
     /**
@@ -101,7 +94,7 @@ public class ChapterContentActivity extends AppCompatActivity {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024))
+                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024)) // 20MB cache
                 .retryOnConnectionFailure(true)
                 .build();
 
@@ -131,7 +124,6 @@ public class ChapterContentActivity extends AppCompatActivity {
             return;
         }
         setUI(true, false);
-        Log.d(TAG, "Loading chapter with chapterId: " + chapterId);
         fetchData(0);
     }
 
@@ -139,19 +131,10 @@ public class ChapterContentActivity extends AppCompatActivity {
      * Gọi API lấy URL ảnh
      */
     private void fetchData(int attempt) {
-        // Hủy call trước nếu còn tồn tại
-        if (currentCall != null) {
-            currentCall.cancel();
-            Log.d(TAG, "Canceled previous API call");
-        }
-
-        currentCall = apiService.getChapterContent(chapterId);
-        currentCall.enqueue(new retrofit2.Callback<ChapterResponse>() {
+        apiService.getChapterContent(chapterId).enqueue(new retrofit2.Callback<ChapterResponse>() {
             @Override
             public void onResponse(Call<ChapterResponse> call, retrofit2.Response<ChapterResponse> res) {
-                currentCall = null;
                 if (!res.isSuccessful() || res.body() == null || !"success".equalsIgnoreCase(res.body().status)) {
-                    Log.e(TAG, "API error: " + (res.code() != 0 ? res.code() : "No data"));
                     retryOrError(attempt, "Lỗi tải: " + (res.code() != 0 ? res.code() : "Không có dữ liệu"));
                     return;
                 }
@@ -170,17 +153,13 @@ public class ChapterContentActivity extends AppCompatActivity {
                     imageUrls.addAll(urls);
                     imageAdapter.notifyDataSetChanged();
                     setUI(false, true);
-                    Log.d(TAG, "Loaded " + urls.size() + " images for chapter");
                 }
+                setTitle("Nội dung chương");
             }
 
             @Override
             public void onFailure(Call<ChapterResponse> call, Throwable t) {
-                currentCall = null;
-                if (!call.isCanceled()) {
-                    Log.e(TAG, "API failure: " + t.getMessage());
-                    retryOrError(attempt, t.getMessage());
-                }
+                retryOrError(attempt, t.getMessage());
             }
         });
     }
@@ -189,12 +168,8 @@ public class ChapterContentActivity extends AppCompatActivity {
      * Thử lại hoặc hiển thị lỗi
      */
     private void retryOrError(int attempt, String msg) {
-        if (attempt < MAX_RETRIES) {
-            Log.d(TAG, "Retrying API call, attempt: " + (attempt + 1));
-            fetchData(attempt + 1);
-        } else {
-            showError("Lỗi: " + msg);
-        }
+        if (attempt < MAX_RETRIES) fetchData(attempt + 1);
+        else showError("Lỗi: " + msg);
     }
 
     /**
@@ -213,16 +188,5 @@ public class ChapterContentActivity extends AppCompatActivity {
         Log.e(TAG, msg);
         setUI(false, false);
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        // Hủy call khi Activity bị hủy
-        if (currentCall != null) {
-            currentCall.cancel();
-            Log.d(TAG, "Canceled API call on destroy");
-        }
-        overridePendingTransition(0, 0);
     }
 }
