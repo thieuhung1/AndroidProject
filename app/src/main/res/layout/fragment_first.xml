@@ -33,7 +33,7 @@
             android:layout_margin="8dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
-            app:cardBackgroundColor="@color/white"> <!-- Đặt màu nền cho CardView -->
+            app:cardBackgroundColor="@color/white">
 
             <EditText
                 android:id="@+id/searchEditText"
@@ -122,116 +122,6 @@
                         android:orientation="horizontal"
                         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                         tools:listitem="@layout/item_comic_horizontal" />
-                </LinearLayout>
-
-                <!-- Phổ Biến -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:id="@+id/popularTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Phổ Biến"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/white" />
-
-                        <TextView
-                            android:id="@+id/seeAllpopular"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:text="Xem tất cả"
-                            android:textColor="@color/white"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="12dp"
-                            android:minHeight="48dp"
-                            android:minWidth="48dp"
-                            android:clickable="true"/>
-                    </RelativeLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/popularRecycler"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        tools:listitem="@layout/item_comic_horizontal" />
-                </LinearLayout>
-
-                <!-- Thể Loại -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <RelativeLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp">
-
-                        <TextView
-                            android:id="@+id/categoriesTitle"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Thể Loại"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/white" />
-
-                        <TextView
-                            android:id="@+id/seeAllCategories"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:text="Xem tất cả"
-                            android:textColor="@color/white"
-                            android:padding="8dp"
-                            android:clickable="true" />
-                    </RelativeLayout>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/categoriesRecycler"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        tools:listitem="@layout/item_comic_horizontal" />
-                </LinearLayout>
-
-                <!-- Gợi Ý Cho Bạn -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/recommendedTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Gợi Ý Cho Bạn"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:layout_marginBottom="8dp" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerViewComics"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                        app:spanCount="3"
-                        tools:listitem="@layout/item_comic_vertical" />
                 </LinearLayout>
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>

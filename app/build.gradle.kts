@@ -50,6 +50,7 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.5.0")
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
     implementation ("at.favre.lib:bcrypt:0.9.0")
+    implementation ("org.mindrot:jbcrypt:0.4")
 
     // AndroidX
     implementation("androidx.drawerlayout:drawerlayout:1.1.1")
