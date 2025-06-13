@@ -4,11 +4,12 @@ import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -36,6 +37,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class FirstFragment extends Fragment {
+    private FrameLayout progressOverlay;
+    private ProgressBar progressBar;
     private static final String TAG = "FirstFragment";
     private static final String COMICS_JSON_FILE = "comics.json";
     private static final String FIRESTORE_COLLECTION = "comics";
@@ -45,7 +48,7 @@ public class FirstFragment extends Fragment {
     private final List<Comic> comicList = new ArrayList<>();
     private final List<Comic> filteredComicList = new ArrayList<>();
     private FirebaseFirestore db;
-    private boolean isShowingAll = false; // Đảm bảo mặc định là false
+    private boolean isShowingAll = false;
     private EditText searchEditText;
 
     @Override
@@ -59,6 +62,8 @@ public class FirstFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_first, container, false);
+        progressOverlay = view.findViewById(R.id.progressOverlay);
+        progressBar = view.findViewById(R.id.progressBar);
         setupRecyclerView(view);
         setupSearch(view);
         setupSeeAllButton(view);
@@ -66,37 +71,41 @@ public class FirstFragment extends Fragment {
         return view;
     }
 
-    // Cài đặt RecyclerView
     private void setupRecyclerView(View view) {
         RecyclerView recyclerView = view.findViewById(R.id.newUpdatesRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        recyclerView.setHasFixedSize(true); // Optimize for fixed-size items
         adapter = new ComicAdapter(getContext(), filteredComicList);
         recyclerView.setAdapter(adapter);
     }
 
-    // Cài đặt tìm kiếm
     private void setupSearch(View view) {
         searchEditText = view.findViewById(R.id.searchEditText);
         searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override public void afterTextChanged(Editable s) { filterComics(s.toString()); }
+            private final Runnable searchRunnable = () -> filterComics(searchEditText.getText().toString());
+            private final android.os.Handler handler = new android.os.Handler();
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                handler.removeCallbacks(searchRunnable);
+                handler.postDelayed(searchRunnable, 300); // Debounce search
+            }
         });
     }
 
-    // Cài đặt nút "Xem tất cả"
     private void setupSeeAllButton(View view) {
         TextView seeAllButton = view.findViewById(R.id.seeAllNewUpdates);
         seeAllButton.setOnClickListener(v -> {
-            Log.d(TAG, "Nút Xem tất cả pressed, isShowingAll trước: " + isShowingAll);
             isShowingAll = !isShowingAll;
             filterComics(searchEditText.getText().toString());
             seeAllButton.setText(isShowingAll ? "Thu gọn" : "Xem tất cả");
-            Log.d(TAG, "isShowingAll sau: " + isShowingAll + ", Số truyện hiển thị: " + filteredComicList.size());
         });
     }
 
-    // Lọc truyện theo query
     private void filterComics(String query) {
         filteredComicList.clear();
         List<Comic> tempList = query.isEmpty() ? new ArrayList<>(comicList) :
@@ -105,43 +114,49 @@ public class FirstFragment extends Fragment {
                                 c.origin_name.toLowerCase().contains(query.toLowerCase()) ||
                                 c.category.stream().anyMatch(cat -> cat.toLowerCase().contains(query.toLowerCase())))
                         .collect(Collectors.toList());
-        // Chỉ giới hạn 10 truyện nếu không tìm kiếm và không ở chế độ "Xem tất cả"
         filteredComicList.addAll(isShowingAll ? tempList :
                 tempList.subList(0, Math.min(DISPLAY_LIMIT, tempList.size())));
         adapter.notifyDataSetChanged();
-        Log.d(TAG, "filterComics: Query = " + query + ", Số truyện hiển thị = " + filteredComicList.size());
         if (!query.isEmpty() && filteredComicList.isEmpty()) {
             Utility.showToast(getContext(), "Không tìm thấy truyện");
         }
     }
 
-    // Tải truyện từ Firestore, fallback sang JSON nếu lỗi
     private void loadComics() {
+        showProgress(true);
         db.collection(FIRESTORE_COLLECTION).get().addOnCompleteListener(task -> {
+            showProgress(false);
             if (task.isSuccessful() && !task.getResult().isEmpty()) {
                 parseFirestoreData(task.getResult());
             } else {
-                logError("Firestore", task.getException());
                 loadFromJson();
             }
         });
     }
 
-    // Tải truyện từ JSON và đẩy lên Firestore
     private void loadFromJson() {
-        try {
-            InputStream is = requireContext().getAssets().open(COMICS_JSON_FILE);
-            JSONArray items = new JSONObject(new String(is.readAllBytes(), StandardCharsets.UTF_8))
-                    .getJSONObject("data").getJSONArray("items");
-            is.close();
-            parseJsonData(items);
-            uploadToFirestore();
-        } catch (Exception e) {
-            logError("JSON", e);
-        }
+        showProgress(true);
+        new Thread(() -> {
+            try {
+                InputStream is = requireContext().getAssets().open(COMICS_JSON_FILE);
+                JSONArray items = new JSONObject(new String(is.readAllBytes(), StandardCharsets.UTF_8))
+                        .getJSONObject("data").getJSONArray("items");
+                is.close();
+                parseJsonData(items);
+                requireActivity().runOnUiThread(() -> {
+                    filterComics("");
+                    uploadToFirestore();
+                    showProgress(false);
+                });
+            } catch (Exception e) {
+                requireActivity().runOnUiThread(() -> {
+                    Utility.showToast(getContext(), "Lỗi tải dữ liệu JSON");
+                    showProgress(false);
+                });
+            }
+        }).start();
     }
 
-    // Đẩy truyện mới lên Firestore
     private void uploadToFirestore() {
         if (comicList.isEmpty()) return;
         db.collection(FIRESTORE_COLLECTION).get().addOnCompleteListener(task -> {
@@ -155,11 +170,12 @@ public class FirstFragment extends Fragment {
                     uploadCount++;
                 }
             }
-            if (uploadCount > 0) Utility.showToast(getContext(), "Đã đẩy " + uploadCount + " truyện");
+            if (uploadCount > 0) {
+                Utility.showToast(getContext(), "Đã đẩy " + uploadCount + " truyện");
+            }
         });
     }
 
-    // Phân tích JSON
     private void parseJsonData(JSONArray items) throws Exception {
         comicList.clear();
         for (int i = 0; i < items.length(); i++) {
@@ -174,7 +190,9 @@ public class FirstFragment extends Fragment {
             comic.updatedAt = obj.getString("updatedAt");
             comic.category = new ArrayList<>();
             JSONArray cats = obj.getJSONArray("category");
-            for (int j = 0; j < cats.length(); j++) comic.category.add(cats.getJSONObject(j).getString("name"));
+            for (int j = 0; j < cats.length(); j++) {
+                comic.category.add(cats.getJSONObject(j).getString("name"));
+            }
             if (obj.has("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
                 JSONObject chapObj = obj.getJSONArray("chaptersLatest").getJSONObject(0);
                 Comic.Chapter chap = new Comic.Chapter();
@@ -186,10 +204,8 @@ public class FirstFragment extends Fragment {
             }
             comicList.add(comic);
         }
-        filterComics(""); // Gọi filter để đảm bảo hiển thị 10 truyện
     }
 
-    // Phân tích Firestore
     private void parseFirestoreData(Iterable<QueryDocumentSnapshot> documents) {
         comicList.clear();
         for (QueryDocumentSnapshot doc : documents) {
@@ -217,12 +233,11 @@ public class FirstFragment extends Fragment {
             }
             comicList.add(comic);
         }
-        filterComics(""); // Gọi filter để đảm bảo hiển thị 10 truyện
+        filterComics("");
     }
 
-    // Ghi log lỗi
-    private void logError(String source, Exception e) {
-        Log.e(TAG, "Lỗi tải từ " + source, e);
-        Utility.showToast(getContext(), "Lỗi tải dữ liệu từ " + source);
+    private void showProgress(boolean show) {
+        progressOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

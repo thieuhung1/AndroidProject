@@ -2,29 +2,26 @@ package com.example.apptruyen.firebase;
 
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.apptruyen.Home.ChapterDetail;
 import com.example.apptruyen.R;
 import com.example.apptruyen.model.Comic;
-
 import java.util.List;
 
 public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHolder> {
     private static final String TAG = "ComicAdapter";
     private final Context context;
     private final List<Comic> comics;
+    private long lastClickTime = 0;
+    private static final long CLICK_DEBOUNCE_MS = 500; // 500ms debounce
 
     public ComicAdapter(Context context, List<Comic> comics) {
         this.context = context;
@@ -51,7 +48,13 @@ public class ComicAdapter extends RecyclerView.Adapter<ComicAdapter.ComicViewHol
                 .override(300, 450)
                 .into(holder.imageThumb);
 
-        holder.itemView.setOnClickListener(v -> openComicDetails(comic));
+        holder.itemView.setOnClickListener(v -> {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime - lastClickTime > CLICK_DEBOUNCE_MS) {
+                lastClickTime = currentTime;
+                openComicDetails(comic);
+            }
+        });
     }
 
     private void openComicDetails(Comic comic) {

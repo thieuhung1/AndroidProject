@@ -4,8 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,9 +28,6 @@ import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-/**
- * Activity hiển thị nội dung chương truyện với ảnh chất lượng cao.
- */
 public class ChapterContentActivity extends AppCompatActivity {
     private static final String TAG = "ChapterContent";
     private static final String BASE_URL = "https://sv1.otruyencdn.com/";
@@ -53,48 +50,43 @@ public class ChapterContentActivity extends AppCompatActivity {
         setupRecyclerView();
         setupRetrofit();
 
-        // Lấy dữ liệu từ Intent
+        // Get data from Intent
         chapterId = getIntent().getStringExtra("chapter_id");
-
         if (chapterId == null || chapterId.isEmpty()) {
             showError("ID chương không hợp lệ");
             finish();
             return;
         }
+
         loadChapter();
     }
 
-    /**
-     * Khởi tạo giao diện và sự kiện nút
-     */
     private void initViews() {
         progressBar = findViewById(R.id.progressBar);
         recyclerImages = findViewById(R.id.recyclerImages);
         tvNoContent = findViewById(R.id.tvNoContent);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
 
         findViewById(R.id.retryButton).setOnClickListener(v -> loadChapter());
     }
 
-    /**
-     * Thiết lập RecyclerView để hiển thị ảnh
-     */
     private void setupRecyclerView() {
         recyclerImages.setLayoutManager(new LinearLayoutManager(this));
+        recyclerImages.setHasFixedSize(true);
         imageAdapter = new ImageAdapter(imageUrls);
         recyclerImages.setAdapter(imageAdapter);
     }
 
-    /**
-     * Thiết lập Retrofit với cache OkHttp
-     */
     private void setupRetrofit() {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
                 .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024)) // 20MB cache
+                .cache(new okhttp3.Cache(new java.io.File(getCacheDir(), "http-cache"), 20 * 1024 * 1024))
                 .retryOnConnectionFailure(true)
                 .build();
 
@@ -106,18 +98,12 @@ public class ChapterContentActivity extends AppCompatActivity {
                 .create(ApiService.class);
     }
 
-    /**
-     * Kiểm tra kết nối mạng
-     */
     private boolean isNetworkAvailable() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo n = cm.getActiveNetworkInfo();
         return n != null && n.isConnected();
     }
 
-    /**
-     * Tải nội dung chương
-     */
     private void loadChapter() {
         if (!isNetworkAvailable()) {
             showError("Không có kết nối mạng");
@@ -127,9 +113,6 @@ public class ChapterContentActivity extends AppCompatActivity {
         fetchData(0);
     }
 
-    /**
-     * Gọi API lấy URL ảnh
-     */
     private void fetchData(int attempt) {
         apiService.getChapterContent(chapterId).enqueue(new retrofit2.Callback<ChapterResponse>() {
             @Override
@@ -152,9 +135,10 @@ public class ChapterContentActivity extends AppCompatActivity {
                     imageUrls.clear();
                     imageUrls.addAll(urls);
                     imageAdapter.notifyDataSetChanged();
+                    recyclerImages.startAnimation(AnimationUtils.loadAnimation(ChapterContentActivity.this, R.anim.fade_in));
                     setUI(false, true);
                 }
-                setTitle("Nội dung chương");
+                setTitle(getIntent().getStringExtra("chapter_name") + ": " + getIntent().getStringExtra("chapter_title"));
             }
 
             @Override
@@ -164,29 +148,23 @@ public class ChapterContentActivity extends AppCompatActivity {
         });
     }
 
-    /**
-     * Thử lại hoặc hiển thị lỗi
-     */
     private void retryOrError(int attempt, String msg) {
         if (attempt < MAX_RETRIES) fetchData(attempt + 1);
         else showError("Lỗi: " + msg);
     }
 
-    /**
-     * Cập nhật giao diện
-     */
     private void setUI(boolean loading, boolean showImages) {
         progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         recyclerImages.setVisibility(showImages ? View.VISIBLE : View.GONE);
         findViewById(R.id.errorLayout).setVisibility(!loading && !showImages ? View.VISIBLE : View.GONE);
     }
 
-    /**
-     * Hiển thị thông báo lỗi
-     */
     private void showError(String msg) {
-        Log.e(TAG, msg);
         setUI(false, false);
+        toast(msg);
+    }
+
+    private void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }

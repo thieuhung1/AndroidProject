@@ -11,6 +11,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
+        <!-- AppBar và SearchView như cũ -->
         <com.google.android.material.appbar.AppBarLayout
             android:id="@+id/appBarLayout"
             android:layout_width="match_parent"
@@ -26,7 +27,6 @@
                 app:titleTextColor="@color/white" />
         </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- START: Thêm phần tìm kiếm ở đây -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -50,7 +50,6 @@
                 android:textColor="@color/black"
                 android:textColorHint="@color/black" />
         </androidx.cardview.widget.CardView>
-        <!-- END: Phần tìm kiếm -->
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -64,7 +63,7 @@
                 android:orientation="vertical"
                 android:padding="8dp">
 
-                <!-- Banner -->
+                <!-- Banner và RecyclerView như cũ -->
                 <androidx.cardview.widget.CardView
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
@@ -80,7 +79,6 @@
                         android:contentDescription="Banner truyện" />
                 </androidx.cardview.widget.CardView>
 
-                <!-- Mới Cập Nhật -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -127,15 +125,22 @@
         </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 
-    <!-- ⏳ Loading Indicator -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyleLarge"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="200dp"
+    <!-- ProgressBar với hiệu ứng mờ -->
+    <FrameLayout
+        android:id="@+id/progressOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
         android:visibility="gone"
-        android:indeterminate="true" />
+        android:elevation="8dp">
 
+        <ProgressBar
+            android:id="@+id/progressBar"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/white"/>
+    </FrameLayout>
 </FrameLayout>

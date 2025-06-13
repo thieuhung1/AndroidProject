@@ -3,19 +3,24 @@ package com.example.apptruyen.Home;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.*;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
+import android.widget.ProgressBar;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.apptruyen.R;
 import com.example.apptruyen.firebase.ComicAdapter;
 import com.example.apptruyen.model.Comic;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ThirdFragment extends Fragment {
     private RecyclerView recyclerLikedComics;
@@ -24,34 +29,47 @@ public class ThirdFragment extends Fragment {
     private FirebaseFirestore db;
     private SharedPreferences prefs;
     private Context ctx;
-    private String username; // tên người dùng hiện tại
+    private String username;
+    private FrameLayout progressOverlay;
+    private ProgressBar progressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_third, container, false);
         ctx = requireContext();
 
-        // Khởi tạo RecyclerView
+        // Initialize ProgressBar programmatically
+        progressOverlay = new FrameLayout(ctx);
+        progressOverlay.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        progressOverlay.setBackgroundColor(0x80000000); // Semi-transparent background
+        progressBar = new ProgressBar(ctx);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        params.gravity = android.view.Gravity.CENTER;
+        progressBar.setLayoutParams(params);
+        progressOverlay.addView(progressBar);
+        ((FrameLayout) view).addView(progressOverlay);
+        progressOverlay.setVisibility(View.GONE);
+
+        // Initialize RecyclerView
         recyclerLikedComics = view.findViewById(R.id.recyclerLC);
-        comicAdapter = new ComicAdapter(ctx, likedComicsList);
         recyclerLikedComics.setLayoutManager(new GridLayoutManager(ctx, 3));
+        recyclerLikedComics.setHasFixedSize(true); // Optimize for fixed-size items
+        comicAdapter = new ComicAdapter(ctx, likedComicsList);
         recyclerLikedComics.setAdapter(comicAdapter);
 
         db = FirebaseFirestore.getInstance();
 
-        // ✅ Lấy username từ SharedPreferences (user đã đăng nhập)
+        // Get username from SharedPreferences
         SharedPreferences userPrefs = ctx.getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         username = userPrefs.getString("username", null);
 
         if (username == null) {
             Toast.makeText(ctx, "Không xác định được người dùng", Toast.LENGTH_SHORT).show();
-            return view; // không load nếu chưa đăng nhập
+            return view;
         }
 
-        // ✅ Mỗi người dùng có 1 SharedPreferences riêng
         prefs = ctx.getSharedPreferences("FavoriteComics_" + username, Context.MODE_PRIVATE);
-
-        loadLikedComics(); // tải danh sách truyện yêu thích
+        loadLikedComics();
         return view;
     }
 
@@ -62,8 +80,10 @@ public class ThirdFragment extends Fragment {
             return;
         }
 
+        showProgress(true);
         likedComicsList.clear();
-        final int[] loaded = {0}; // đếm số lượng đã tải
+        final int[] loaded = {0};
+        int total = favorites.size();
 
         for (String id : favorites) {
             db.collection("comics").document(id).get()
@@ -81,16 +101,25 @@ public class ThirdFragment extends Fragment {
                             likedComicsList.add(c);
                         }
 
-                        if (++loaded[0] == favorites.size()) {
-                            comicAdapter.notifyDataSetChanged(); // chỉ update khi load đủ
+                        if (++loaded[0] == total) {
+                            comicAdapter.notifyDataSetChanged();
+                            recyclerLikedComics.startAnimation(AnimationUtils.loadAnimation(ctx, R.anim.fade_in));
+                            showProgress(false);
                         }
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(ctx, "Lỗi tải truyện " + id, Toast.LENGTH_SHORT).show();
-                        if (++loaded[0] == favorites.size()) {
+                        if (++loaded[0] == total) {
                             comicAdapter.notifyDataSetChanged();
+                            recyclerLikedComics.startAnimation(AnimationUtils.loadAnimation(ctx, R.anim.fade_in));
+                            showProgress(false);
                         }
                     });
         }
+    }
+
+    private void showProgress(boolean show) {
+        progressOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 }

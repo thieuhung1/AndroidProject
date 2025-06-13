@@ -3,7 +3,8 @@ package com.example.apptruyen.Home;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.View;
+import android.view.animation.AnimationUtils;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -14,10 +15,12 @@ import com.example.apptruyen.R;
 import com.example.apptruyen.firebase.ChapterAdapter;
 import com.example.apptruyen.model.Comic;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.gson.Gson;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.json.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,6 +33,8 @@ public class ChapterDetail extends AppCompatActivity {
     private TextView tvTenTruyen, tvTacGia, tvTheLoai, tvGioiThieu;
     private Button btnDocTruyen;
     private RecyclerView recyclerChapters;
+    private FrameLayout progressOverlay;
+    private ProgressBar progressBar;
     private ChapterAdapter chapterAdapter;
     private final List<Comic.Chapter> chapterList = new ArrayList<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -54,11 +59,23 @@ public class ChapterDetail extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         recyclerChapters = findViewById(R.id.recyclerChapters);
 
+        progressOverlay = new FrameLayout(this);
+        progressOverlay.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        progressOverlay.setBackgroundColor(0x80000000);
+        progressBar = new ProgressBar(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+        params.gravity = android.view.Gravity.CENTER;
+        progressBar.setLayoutParams(params);
+        progressOverlay.addView(progressBar);
+        ((FrameLayout) findViewById(android.R.id.content)).addView(progressOverlay);
+        progressOverlay.setVisibility(View.GONE);
+
         SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         username = userPrefs.getString("username", null);
         if (username == null) {
             toast("Không xác định được tài khoản!");
-            finish(); return;
+            finish();
+            return;
         }
 
         prefs = getSharedPreferences("FavoriteComics_" + username, MODE_PRIVATE);
@@ -68,11 +85,15 @@ public class ChapterDetail extends AppCompatActivity {
         comicId = getIntent().getStringExtra("comicId");
         comicslug = getIntent().getStringExtra("slug");
 
-        chapterAdapter = new ChapterAdapter(chapterList);
         recyclerChapters.setLayoutManager(new LinearLayoutManager(this));
+        recyclerChapters.setHasFixedSize(true);
+        chapterAdapter = new ChapterAdapter(chapterList);
         recyclerChapters.setAdapter(chapterAdapter);
 
-        btnBack.setOnClickListener(v -> finish());
+        btnBack.setOnClickListener(v -> {
+            finish();
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
         btnDocTruyen.setOnClickListener(v -> startFirstChapter());
         btnYeuThich.setOnClickListener(v -> toggleFavorite());
 
@@ -93,13 +114,16 @@ public class ChapterDetail extends AppCompatActivity {
         else favorites.add(comicId);
         isFavorite = !isFavorite;
         prefs.edit().putStringSet(FAVORITE_KEY, favorites).apply();
+        btnYeuThich.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         btnYeuThich.setImageResource(isFavorite ? R.drawable.ic_like_filled : R.drawable.ic_like);
         toast(isFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích");
     }
 
     private void loadComicData() {
+        showProgress(true);
         db.collection("comics").document(comicId).get()
                 .addOnSuccessListener(doc -> {
+                    showProgress(false);
                     tvTenTruyen.setText(doc.getString("name"));
                     tvTacGia.setText("Tác giả: " + doc.getString("author"));
                     tvGioiThieu.setText(doc.getString("description"));
@@ -107,32 +131,45 @@ public class ChapterDetail extends AppCompatActivity {
                     if (cats != null) tvTheLoai.setText("Thể loại: " + String.join(", ", cats));
 
                     String thumb = doc.getString("thumb_url");
-                    if (thumb != null && !thumb.isEmpty())
+                    if (thumb != null && !thumb.isEmpty()) {
                         Glide.with(this)
                                 .load("https://img.otruyenapi.com/uploads/comics/" + thumb)
                                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                                 .placeholder(R.drawable.placeholder_image)
                                 .into(imgBiaTruyen);
+                        imgBiaTruyen.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+                    }
                 })
-                .addOnFailureListener(e -> finishWithError("Lỗi tải dữ liệu truyện"));
+                .addOnFailureListener(e -> {
+                    showProgress(false);
+                    finishWithError("Lỗi tải dữ liệu truyện");
+                });
     }
 
     private void loadChapters(String slug) {
+        showProgress(true);
+        String cachedChapters = cachePrefs.getString("chapters_" + slug, null);
+        if (cachedChapters != null) {
+            try {
+                List<Comic.Chapter> chapters = new Gson().fromJson(cachedChapters, new com.google.gson.reflect.TypeToken<List<Comic.Chapter>>(){}.getType());
+                updateChapters(chapters);
+                return;
+            } catch (Exception e) {
+                toastUi("Lỗi đọc cache");
+            }
+        }
+
         executor.execute(() -> {
             try {
-                String cacheKey = "cached_chapter_" + slug;
-                String jsonStr = cachePrefs.getString(cacheKey, null);
-                if (jsonStr == null) {
-                    OkHttpClient client = new OkHttpClient();
-                    Response response = client.newCall(new Request.Builder().url(API_URL + slug).build()).execute();
-                    if (!response.isSuccessful()) {
-                        toastUi("Lỗi API: " + response.code());
-                        return;
-                    }
-                    jsonStr = response.body().string();
-                    cachePrefs.edit().putString(cacheKey, jsonStr).apply();
+                OkHttpClient client = new OkHttpClient();
+                Response response = client.newCall(new Request.Builder().url(API_URL + slug).build()).execute();
+                if (!response.isSuccessful()) {
+                    toastUi("Lỗi API: " + response.code());
+                    showProgress(false);
+                    return;
                 }
 
+                String jsonStr = response.body().string();
                 JSONArray serverData = new JSONObject(jsonStr)
                         .getJSONObject("data").getJSONObject("item")
                         .getJSONArray("chapters").getJSONObject(0)
@@ -149,44 +186,51 @@ public class ChapterDetail extends AppCompatActivity {
                     chapters.add(c);
                 }
 
-                runOnUiThread(() -> {
-                    chapterList.clear();
-                    chapterList.addAll(chapters);
-                    chapterAdapter.notifyDataSetChanged();
-                });
+                cachePrefs.edit().putString("chapters_" + slug, new Gson().toJson(chapters)).apply();
 
+                runOnUiThread(() -> updateChapters(chapters));
             } catch (Exception e) {
-                Log.e("ChapterDetail", "Lỗi tải chương", e);
-                toastUi(e instanceof java.io.IOException ? "Lỗi mạng" : "Lỗi xử lý dữ liệu");
+                runOnUiThread(() -> {
+                    showProgress(false);
+                    toast(e instanceof java.io.IOException ? "Lỗi mạng" : "Lỗi tải");
+                });
             }
         });
     }
 
+    private void updateChapters(List<Comic.Chapter> chapters) {
+        chapterList.clear();
+        chapterList.addAll(chapters);
+        chapterAdapter.notifyDataSetChanged();
+        recyclerChapters.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+        showProgress(false);
+    }
+
     private void startFirstChapter() {
         if (chapterList.isEmpty()) {
-            toast("Không có chương nào để đọc");
+            toast("Không có chương nào");
             return;
         }
 
         Comic.Chapter first = Collections.min(chapterList, Comparator.comparingInt(c -> extractNumber(c.chapter_name)));
         String chapterId = extractChapterId(first.chapter_api_data);
         if (chapterId == null) {
-            toast("Lỗi dữ liệu chương");
+            toast("Lỗi dữ liệu");
             return;
         }
 
-        // ✅ Ghi lại truyện đã đọc lên Firestore
         markAsReadOnline(comicId);
 
         Intent intent = new Intent(this, ChapterContentActivity.class);
         intent.putExtra("chapter_id", chapterId);
         intent.putExtra("chapter_name", first.chapter_name);
-        intent.putExtra("chapter_title", first.chapter_title);
+        intent.putExtra("chapter_title", first.chapter_title); // Sửa lỗi cú pháp
         startActivity(intent);
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private void markAsReadOnline(String comicId) {
-        if (username == null) return;
+        if (username == null) return; // Sửa lỗi logic
         db.collection("users").document(username).get()
                 .addOnSuccessListener(doc -> {
                     List<String> read = (List<String>) doc.get("read_comics");
@@ -207,22 +251,21 @@ public class ChapterDetail extends AppCompatActivity {
         try {
             String[] parts = apiData.split("/");
             return parts[parts.length - 1];
-        } catch (Exception e) {
-            return null;
-        }
+        } catch (Exception e) { return null; }
     }
 
-    private void toast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
-    }
+    private void toast(String msg) { Toast.makeText(this, msg, Toast.LENGTH_SHORT).show(); }
 
-    private void toastUi(String msg) {
-        runOnUiThread(() -> toast(msg));
-    }
+    private void toastUi(String msg) { runOnUiThread(() -> toast(msg)); }
 
     private void finishWithError(String msg) {
         toast(msg);
         finish();
+    }
+
+    private void showProgress(boolean show) {
+        progressOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
+        progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @Override
