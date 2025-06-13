@@ -18,14 +18,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.*;
-
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ChapterDetail extends AppCompatActivity {
     private static final String API_URL = "https://otruyenapi.com/v1/api/truyen-tranh/";
-    private static final String PREFS_NAME = "FavoriteComics";
     private static final String FAVORITE_KEY = "favorite_comics";
 
     private ImageView imgBiaTruyen, btnYeuThich, btnBack;
@@ -36,9 +34,9 @@ public class ChapterDetail extends AppCompatActivity {
     private final List<Comic.Chapter> chapterList = new ArrayList<>();
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private SharedPreferences prefs;
+    private SharedPreferences prefs, cachePrefs;
     private FirebaseFirestore db;
-    private String comicId, comicslug;
+    private String comicId, comicslug, username;
     private boolean isFavorite;
 
     @Override
@@ -56,7 +54,15 @@ public class ChapterDetail extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         recyclerChapters = findViewById(R.id.recyclerChapters);
 
-        prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        username = userPrefs.getString("username", null);
+        if (username == null) {
+            toast("Không xác định được tài khoản!");
+            finish(); return;
+        }
+
+        prefs = getSharedPreferences("FavoriteComics_" + username, MODE_PRIVATE);
+        cachePrefs = getSharedPreferences("chapter_cache", MODE_PRIVATE);
         db = FirebaseFirestore.getInstance();
 
         comicId = getIntent().getStringExtra("comicId");
@@ -115,7 +121,7 @@ public class ChapterDetail extends AppCompatActivity {
         executor.execute(() -> {
             try {
                 String cacheKey = "cached_chapter_" + slug;
-                String jsonStr = prefs.getString(cacheKey, null);
+                String jsonStr = cachePrefs.getString(cacheKey, null);
                 if (jsonStr == null) {
                     OkHttpClient client = new OkHttpClient();
                     Response response = client.newCall(new Request.Builder().url(API_URL + slug).build()).execute();
@@ -124,7 +130,7 @@ public class ChapterDetail extends AppCompatActivity {
                         return;
                     }
                     jsonStr = response.body().string();
-                    prefs.edit().putString(cacheKey, jsonStr).apply();
+                    cachePrefs.edit().putString(cacheKey, jsonStr).apply();
                 }
 
                 JSONArray serverData = new JSONObject(jsonStr)
@@ -161,6 +167,7 @@ public class ChapterDetail extends AppCompatActivity {
             toast("Không có chương nào để đọc");
             return;
         }
+
         Comic.Chapter first = Collections.min(chapterList, Comparator.comparingInt(c -> extractNumber(c.chapter_name)));
         String chapterId = extractChapterId(first.chapter_api_data);
         if (chapterId == null) {
@@ -168,11 +175,27 @@ public class ChapterDetail extends AppCompatActivity {
             return;
         }
 
+        // ✅ Ghi lại truyện đã đọc lên Firestore
+        markAsReadOnline(comicId);
+
         Intent intent = new Intent(this, ChapterContentActivity.class);
         intent.putExtra("chapter_id", chapterId);
         intent.putExtra("chapter_name", first.chapter_name);
         intent.putExtra("chapter_title", first.chapter_title);
         startActivity(intent);
+    }
+
+    private void markAsReadOnline(String comicId) {
+        if (username == null) return;
+        db.collection("users").document(username).get()
+                .addOnSuccessListener(doc -> {
+                    List<String> read = (List<String>) doc.get("read_comics");
+                    if (read == null) read = new ArrayList<>();
+                    if (!read.contains(comicId)) {
+                        read.add(comicId);
+                        db.collection("users").document(username).update("read_comics", read);
+                    }
+                });
     }
 
     private int extractNumber(String text) {
