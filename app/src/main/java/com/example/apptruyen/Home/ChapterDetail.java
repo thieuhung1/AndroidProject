@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 public class ChapterDetail extends AppCompatActivity {
     private static final String API_URL = "https://otruyenapi.com/v1/api/truyen-tranh/";
     private static final String FAVORITE_KEY = "favorite_comics";
+    private static final long CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 1 ngày
 
     private ImageView imgBiaTruyen, btnYeuThich, btnBack;
     private TextView tvTenTruyen, tvTacGia, tvTheLoai, tvGioiThieu;
@@ -49,6 +50,13 @@ public class ChapterDetail extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chapterdetail);
 
+        initViews();
+        initPrefs();
+        setupRecyclerView();
+        loadData();
+    }
+
+    private void initViews() {
         imgBiaTruyen = findViewById(R.id.imgBiaTruyen);
         tvTenTruyen = findViewById(R.id.tvTenTruyen);
         tvTacGia = findViewById(R.id.tvTacGia);
@@ -70,33 +78,34 @@ public class ChapterDetail extends AppCompatActivity {
         ((FrameLayout) findViewById(android.R.id.content)).addView(progressOverlay);
         progressOverlay.setVisibility(View.GONE);
 
+        btnBack.setOnClickListener(v -> finishWithTransition());
+        btnDocTruyen.setOnClickListener(v -> startFirstChapter());
+        btnYeuThich.setOnClickListener(v -> toggleFavorite());
+    }
+
+    private void initPrefs() {
         SharedPreferences userPrefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
         username = userPrefs.getString("username", null);
         if (username == null) {
-            toast("Không xác định được tài khoản!");
+            toast("Không xác định tài khoản!");
             finish();
             return;
         }
-
         prefs = getSharedPreferences("FavoriteComics_" + username, MODE_PRIVATE);
         cachePrefs = getSharedPreferences("chapter_cache", MODE_PRIVATE);
         db = FirebaseFirestore.getInstance();
-
         comicId = getIntent().getStringExtra("comicId");
         comicslug = getIntent().getStringExtra("slug");
+    }
 
+    private void setupRecyclerView() {
         recyclerChapters.setLayoutManager(new LinearLayoutManager(this));
         recyclerChapters.setHasFixedSize(true);
         chapterAdapter = new ChapterAdapter(chapterList);
         recyclerChapters.setAdapter(chapterAdapter);
+    }
 
-        btnBack.setOnClickListener(v -> {
-            finish();
-            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-        });
-        btnDocTruyen.setOnClickListener(v -> startFirstChapter());
-        btnYeuThich.setOnClickListener(v -> toggleFavorite());
-
+    private void loadData() {
         checkFavoriteStatus();
         loadComicData();
         if (comicslug != null && !comicslug.isEmpty()) loadChapters(comicslug);
@@ -110,13 +119,13 @@ public class ChapterDetail extends AppCompatActivity {
 
     private void toggleFavorite() {
         Set<String> favorites = new HashSet<>(prefs.getStringSet(FAVORITE_KEY, new HashSet<>()));
-        if (isFavorite) favorites.remove(comicId);
-        else favorites.add(comicId);
         isFavorite = !isFavorite;
+        if (isFavorite) favorites.add(comicId);
+        else favorites.remove(comicId);
         prefs.edit().putStringSet(FAVORITE_KEY, favorites).apply();
         btnYeuThich.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         btnYeuThich.setImageResource(isFavorite ? R.drawable.ic_like_filled : R.drawable.ic_like);
-        toast(isFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích");
+        toast(isFavorite ? "Đã thêm yêu thích" : "Đã xóa yêu thích");
     }
 
     private void loadComicData() {
@@ -124,38 +133,44 @@ public class ChapterDetail extends AppCompatActivity {
         db.collection("comics").document(comicId).get()
                 .addOnSuccessListener(doc -> {
                     showProgress(false);
-                    tvTenTruyen.setText(doc.getString("name"));
-                    tvTacGia.setText("Tác giả: " + doc.getString("author"));
-                    tvGioiThieu.setText(doc.getString("description"));
-                    List<String> cats = (List<String>) doc.get("category");
-                    if (cats != null) tvTheLoai.setText("Thể loại: " + String.join(", ", cats));
+                    if (doc.exists()) {
+                        tvTenTruyen.setText(doc.getString("name"));
+                        tvTacGia.setText("Tác giả: " + doc.getString("author"));
+                        tvGioiThieu.setText(doc.getString("description"));
+                        List<String> cats = (List<String>) doc.get("category");
+                        if (cats != null) tvTheLoai.setText("Thể loại: " + String.join(", ", cats));
 
-                    String thumb = doc.getString("thumb_url");
-                    if (thumb != null && !thumb.isEmpty()) {
-                        Glide.with(this)
-                                .load("https://img.otruyenapi.com/uploads/comics/" + thumb)
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .placeholder(R.drawable.placeholder_image)
-                                .into(imgBiaTruyen);
-                        imgBiaTruyen.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+                        String thumb = doc.getString("thumb_url");
+                        if (thumb != null && !thumb.isEmpty()) {
+                            Glide.with(this)
+                                    .load("https://img.otruyenapi.com/uploads/comics/" + thumb)
+                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                    .placeholder(R.drawable.placeholder_image)
+                                    .thumbnail(0.25f)
+                                    .into(imgBiaTruyen);
+                            imgBiaTruyen.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
+                        }
+                    } else {
+                        finishWithError("Không tìm thấy truyện");
                     }
                 })
-                .addOnFailureListener(e -> {
-                    showProgress(false);
-                    finishWithError("Lỗi tải dữ liệu truyện");
-                });
+                .addOnFailureListener(e -> finishWithError("Lỗi tải truyện"));
     }
 
     private void loadChapters(String slug) {
         showProgress(true);
-        String cachedChapters = cachePrefs.getString("chapters_" + slug, null);
-        if (cachedChapters != null) {
-            try {
-                List<Comic.Chapter> chapters = new Gson().fromJson(cachedChapters, new com.google.gson.reflect.TypeToken<List<Comic.Chapter>>(){}.getType());
-                updateChapters(chapters);
-                return;
-            } catch (Exception e) {
-                toastUi("Lỗi đọc cache");
+        String cacheKey = "chapters_" + slug;
+        long lastCached = cachePrefs.getLong("cache_time_" + slug, 0);
+        if (System.currentTimeMillis() - lastCached < CACHE_EXPIRY) {
+            String cachedChapters = cachePrefs.getString(cacheKey, null);
+            if (cachedChapters != null) {
+                try {
+                    List<Comic.Chapter> chapters = new Gson().fromJson(cachedChapters, new com.google.gson.reflect.TypeToken<List<Comic.Chapter>>(){}.getType());
+                    updateChapters(chapters);
+                    return;
+                } catch (Exception e) {
+                    toastUi("Lỗi đọc cache");
+                }
             }
         }
 
@@ -169,8 +184,7 @@ public class ChapterDetail extends AppCompatActivity {
                     return;
                 }
 
-                String jsonStr = response.body().string();
-                JSONArray serverData = new JSONObject(jsonStr)
+                JSONArray serverData = new JSONObject(response.body().string())
                         .getJSONObject("data").getJSONObject("item")
                         .getJSONArray("chapters").getJSONObject(0)
                         .getJSONArray("server_data");
@@ -186,7 +200,10 @@ public class ChapterDetail extends AppCompatActivity {
                     chapters.add(c);
                 }
 
-                cachePrefs.edit().putString("chapters_" + slug, new Gson().toJson(chapters)).apply();
+                cachePrefs.edit()
+                        .putString(cacheKey, new Gson().toJson(chapters))
+                        .putLong("cache_time_" + slug, System.currentTimeMillis())
+                        .apply();
 
                 runOnUiThread(() -> updateChapters(chapters));
             } catch (Exception e) {
@@ -201,14 +218,14 @@ public class ChapterDetail extends AppCompatActivity {
     private void updateChapters(List<Comic.Chapter> chapters) {
         chapterList.clear();
         chapterList.addAll(chapters);
-        chapterAdapter.notifyDataSetChanged();
+        chapterAdapter.updateChapters(chapters);
         recyclerChapters.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in));
         showProgress(false);
     }
 
     private void startFirstChapter() {
         if (chapterList.isEmpty()) {
-            toast("Không có chương nào");
+            toast("Không có chương");
             return;
         }
 
@@ -221,16 +238,25 @@ public class ChapterDetail extends AppCompatActivity {
 
         markAsReadOnline(comicId);
 
+        ArrayList<String> chapterIds = new ArrayList<>();
+        for (Comic.Chapter c : chapterList) {
+            String id = extractChapterId(c.chapter_api_data);
+            if (id != null) chapterIds.add(id);
+        }
+        int currentIndex = chapterIds.indexOf(chapterId);
+
         Intent intent = new Intent(this, ChapterContentActivity.class);
         intent.putExtra("chapter_id", chapterId);
         intent.putExtra("chapter_name", first.chapter_name);
-        intent.putExtra("chapter_title", first.chapter_title); // Sửa lỗi cú pháp
+        intent.putExtra("chapter_title", first.chapter_title);
+        intent.putStringArrayListExtra("chapter_ids", chapterIds);
+        intent.putExtra("current_index", currentIndex);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private void markAsReadOnline(String comicId) {
-        if (username == null) return; // Sửa lỗi logic
+        if (username == null) return;
         db.collection("users").document(username).get()
                 .addOnSuccessListener(doc -> {
                     List<String> read = (List<String>) doc.get("read_comics");
@@ -249,8 +275,9 @@ public class ChapterDetail extends AppCompatActivity {
 
     private String extractChapterId(String apiData) {
         try {
+            if (apiData == null || apiData.isEmpty()) return null;
             String[] parts = apiData.split("/");
-            return parts[parts.length - 1];
+            return parts.length > 0 ? parts[parts.length - 1] : null;
         } catch (Exception e) { return null; }
     }
 
@@ -261,6 +288,11 @@ public class ChapterDetail extends AppCompatActivity {
     private void finishWithError(String msg) {
         toast(msg);
         finish();
+    }
+
+    private void finishWithTransition() {
+        finish();
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private void showProgress(boolean show) {

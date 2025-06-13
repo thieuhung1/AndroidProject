@@ -89,7 +89,8 @@
             style="@style/Widget.MaterialComponents.Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:text="Thử lại" />
 
     </LinearLayout>
 
@@ -106,14 +107,14 @@
         app:elevation="8dp">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPreviousChapter"
+            android:id="@+id/btnPrevChapter"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
             android:layout_weight="1"
-            android:text="chapter TRƯỚC"
-            android:textColor="@color/white"
+            android:text="CHƯƠNG TRƯỚC"
+            android:textColor="@android:color/white"
             app:icon="@drawable/ic_back"
             app:iconGravity="textStart" />
 
@@ -123,9 +124,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="8dp"
-            android:textColor="@color/white"
             android:layout_weight="1"
-            android:text="CHAPTER SAU"
+            android:text="CHƯƠNG SAU"
+            android:textColor="@android:color/white"
             app:icon="@drawable/ic_next"
             app:iconGravity="textEnd" />
 
