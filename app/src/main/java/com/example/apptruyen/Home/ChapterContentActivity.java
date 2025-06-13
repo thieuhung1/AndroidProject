@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import com.example.apptruyen.R;
 import com.example.apptruyen.api.ApiService;
 import com.example.apptruyen.api.ChapterResponse;
 import com.example.apptruyen.firebase.ImageAdapter;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -26,6 +28,7 @@ public class ChapterContentActivity extends AppCompatActivity {
     private static final String BASE_URL = "https://sv1.otruyencdn.com/";
     private static final int TIMEOUT = 15;
     private static final long CLICK_DEBOUNCE_MS = 500;
+    private static final String USER_PREFS = "user_prefs";
 
     private RecyclerView recyclerImages;
     private ProgressBar progressBar;
@@ -36,15 +39,18 @@ public class ChapterContentActivity extends AppCompatActivity {
     private final List<String> imageUrls = new ArrayList<>();
     private ApiService apiService;
     private ArrayList<String> chapterIds;
-    private int currentIndex;
-    private String chapterId, chapterName, chapterTitle;
+    private int currentIndex, scrollPosition = 0;
+    private String chapterId, chapterName, chapterTitle, username;
     private long lastClickTime = 0;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chapter_content);
 
+        db = FirebaseFirestore.getInstance();
+        username = getSharedPreferences(USER_PREFS, MODE_PRIVATE).getString("username", null);
         initViews();
         setupRecyclerView();
         setupRetrofit();
@@ -76,6 +82,14 @@ public class ChapterContentActivity extends AppCompatActivity {
         recyclerImages.setHasFixedSize(true);
         imageAdapter = new ImageAdapter(imageUrls);
         recyclerImages.setAdapter(imageAdapter);
+        recyclerImages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    saveReadingProgress();
+                }
+            }
+        });
     }
 
     private void setupRetrofit() {
@@ -103,8 +117,8 @@ public class ChapterContentActivity extends AppCompatActivity {
         if (chapterIds != null && currentIndex >= 0 && currentIndex < chapterIds.size()) {
             chapterId = chapterIds.get(currentIndex);
         }
-
         updateToolbarTitle();
+        restoreReadingProgress();
     }
 
     private void updateToolbarTitle() {
@@ -138,6 +152,7 @@ public class ChapterContentActivity extends AppCompatActivity {
                     imageUrls.clear();
                     imageUrls.addAll(urls);
                     imageAdapter.notifyDataSetChanged();
+                    recyclerImages.scrollToPosition(scrollPosition);
                     setUI(false, true, true);
                 }
             }
@@ -167,9 +182,39 @@ public class ChapterContentActivity extends AppCompatActivity {
 
         currentIndex = newIndex;
         chapterId = chapterIds.get(currentIndex);
+        scrollPosition = 0; // Reset khi chuyển chapter
         loadChapter();
-        recyclerImages.smoothScrollToPosition(0);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    private void saveReadingProgress() {
+        if (username == null || chapterId == null) return;
+        LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerImages.getLayoutManager();
+        if (layoutManager != null) {
+            scrollPosition = layoutManager.findFirstVisibleItemPosition();
+            Map<String, Object> progress = new HashMap<>();
+            progress.put("chapter_id", chapterId);
+            progress.put("position", scrollPosition);
+            db.collection("users").document(username)
+                    .update("current_reading", progress);
+        }
+    }
+
+    private void restoreReadingProgress() {
+        if (username == null) return;
+        db.collection("users").document(username).get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        Map<String, Object> reading = (Map<String, Object>) doc.get("current_reading");
+                        if (reading != null && reading.containsKey("chapter_id") && reading.containsKey("position")) {
+                            String savedChapterId = (String) reading.get("chapter_id");
+                            scrollPosition = ((Number) reading.get("position")).intValue();
+                            if (savedChapterId.equals(chapterId)) {
+                                recyclerImages.scrollToPosition(scrollPosition);
+                            }
+                        }
+                    }
+                });
     }
 
     private void setUI(boolean loading, boolean showList, boolean showNav) {
@@ -193,6 +238,7 @@ public class ChapterContentActivity extends AppCompatActivity {
     }
 
     private void finishWithTransition() {
+        saveReadingProgress();
         finish();
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
