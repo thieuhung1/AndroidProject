@@ -1,13 +1,12 @@
 package com.example.apptruyen.Home;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -17,8 +16,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.apptruyen.Login.Login;
 import com.example.apptruyen.R;
-import com.example.apptruyen.Home.EditAccountActivity;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class SecondFragment extends Fragment {
@@ -41,7 +38,7 @@ public class SecondFragment extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         // Đọc username từ SharedPreferences
-        SharedPreferences prefs = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        SharedPreferences prefs = requireActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
         String username = prefs.getString("username", null);
 
         if (username != null) {
@@ -58,7 +55,7 @@ public class SecondFragment extends Fragment {
                     .addOnFailureListener(e -> Log.e(TAG, "Lỗi lấy dữ liệu người dùng", e));
         }
 
-        logoutButton.setOnClickListener(v -> logout());
+        logoutButton.setOnClickListener(v -> showLogoutConfirmation());
 
         settingButton.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), EditAccountActivity.class);
@@ -68,6 +65,17 @@ public class SecondFragment extends Fragment {
         return view;
     }
 
+    // ✅ Hiển thị hộp thoại xác nhận trước khi đăng xuất
+    private void showLogoutConfirmation() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Đăng xuất")
+                .setMessage("Bạn có chắc chắn muốn đăng xuất?")
+                .setPositiveButton("Có", (dialog, which) -> logout())
+                .setNegativeButton("Không", null)
+                .show();
+    }
+
+    // ✅ Xoá thông tin đăng nhập và trở về màn hình Login
     private void logout() {
         if (getActivity() != null) {
             getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE)

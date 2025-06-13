@@ -20,6 +20,8 @@ import com.example.apptruyen.util.Utility;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Login extends AppCompatActivity {
+    private static final String TAG = "LoginActivity"; // Thẻ log để debug
+
     private EditText emailEditText, passwordEditText;
     private ImageView eyeToggle;
     private Button loginButton;
@@ -30,13 +32,25 @@ public class Login extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Kiểm tra đăng nhập tự động
+        SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
+        if (prefs.getBoolean("is_logged_in", false)) {
+            startActivity(new Intent(this, Home.class));
+            finish();
+            return;
+        }
+
         initViews();
         db = FirebaseFirestore.getInstance();
+
         eyeToggle.setOnClickListener(v -> togglePasswordVisibility());
-        findViewById(R.id.signupButton).setOnClickListener(v -> startActivity(new Intent(this, register.class)));
+        findViewById(R.id.signupButton).setOnClickListener(v ->
+                startActivity(new Intent(this, register.class)));
         loginButton.setOnClickListener(v -> attemptLogin());
     }
 
+    // Khởi tạo view
     private void initViews() {
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
@@ -44,13 +58,17 @@ public class Login extends AppCompatActivity {
         loginButton = findViewById(R.id.loginButton);
     }
 
+    // Chuyển đổi hiển thị mật khẩu
     private void togglePasswordVisibility() {
         passwordVisible = !passwordVisible;
-        passwordEditText.setTransformationMethod(passwordVisible ? HideReturnsTransformationMethod.getInstance() : PasswordTransformationMethod.getInstance());
+        passwordEditText.setTransformationMethod(passwordVisible ?
+                HideReturnsTransformationMethod.getInstance() :
+                PasswordTransformationMethod.getInstance());
         eyeToggle.setImageResource(passwordVisible ? R.drawable.eye_close : R.drawable.eye_open);
         passwordEditText.setSelection(passwordEditText.length());
     }
 
+    // Thử đăng nhập
     private void attemptLogin() {
         String email = emailEditText.getText().toString().trim();
         String password = passwordEditText.getText().toString().trim();
@@ -63,10 +81,21 @@ public class Login extends AppCompatActivity {
                     setLoading(false);
                     if (!docs.isEmpty()) {
                         String hashedPasswordFromDb = docs.getDocuments().get(0).getString("password");
+                        String username = docs.getDocuments().get(0).getString("username");
+
+                        if (hashedPasswordFromDb == null || username == null) {
+                            Utility.showToast(this, "Lỗi dữ liệu người dùng");
+                            return;
+                        }
+
                         if (Utility.checkPassword(password, hashedPasswordFromDb)) {
-                            String username = docs.getDocuments().get(0).getString("username");
+                            // Lưu trạng thái đăng nhập
                             SharedPreferences prefs = getSharedPreferences("user_prefs", MODE_PRIVATE);
-                            prefs.edit().putString("username", username).apply();
+                            prefs.edit()
+                                    .putString("username", username)
+                                    .putBoolean("is_logged_in", true)
+                                    .apply();
+
                             Utility.showToast(this, "Đăng nhập thành công");
                             startActivity(new Intent(this, Home.class));
                             finish();
@@ -83,6 +112,7 @@ public class Login extends AppCompatActivity {
                 });
     }
 
+    // Kiểm tra đầu vào
     private boolean validateInputs(String email, String password) {
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
             Utility.showToast(this, "Vui lòng nhập đầy đủ thông tin");
@@ -95,6 +125,7 @@ public class Login extends AppCompatActivity {
         return true;
     }
 
+    // Cài đặt trạng thái tải
     private void setLoading(boolean loading) {
         loginButton.setEnabled(!loading);
         loginButton.setText(loading ? "Đang đăng nhập..." : "Đăng nhập");
