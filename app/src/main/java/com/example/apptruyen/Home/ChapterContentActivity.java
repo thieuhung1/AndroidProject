@@ -6,6 +6,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,6 +37,7 @@ public class ChapterContentActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private RecyclerView recyclerImages;
     private TextView tvNoContent;
+    private TextView tvToolbarTitle; // TextView cho tiêu đề trên toolbar
     private final List<String> imageUrls = new ArrayList<>();
     private ImageAdapter imageAdapter;
     private ApiService apiService;
@@ -50,8 +52,13 @@ public class ChapterContentActivity extends AppCompatActivity {
         setupRecyclerView();
         setupRetrofit();
 
-        // Get data from Intent
+        // Lấy dữ liệu từ Intent và đặt tiêu đề
         chapterId = getIntent().getStringExtra("chapter_id");
+        String chapterName = getIntent().getStringExtra("chapter_name");
+        String chapterTitle = getIntent().getStringExtra("chapter_title");
+        String fullTitle = (chapterName != null ? chapterName : "") + (chapterTitle != null ? ": " + chapterTitle : "");
+        tvToolbarTitle.setText(fullTitle);
+
         if (chapterId == null || chapterId.isEmpty()) {
             showError("ID chương không hợp lệ");
             finish();
@@ -65,10 +72,18 @@ public class ChapterContentActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progressBar);
         recyclerImages = findViewById(R.id.recyclerImages);
         tvNoContent = findViewById(R.id.tvNoContent);
+        tvToolbarTitle = findViewById(R.id.tvToolbarTitle); // Ánh xạ TextView tiêu đề
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> {
-            finish();
+        // Tắt tiêu đề mặc định của Toolbar vì chúng ta sử dụng TextView tùy chỉnh
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
+        }
+
+        // Thêm sự kiện click cho nút back
+        ImageView btnBack = findViewById(R.id.btnBack);
+        btnBack.setOnClickListener(v -> {
+            finish(); // Đóng activity hiện tại
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         });
 
@@ -138,7 +153,7 @@ public class ChapterContentActivity extends AppCompatActivity {
                     recyclerImages.startAnimation(AnimationUtils.loadAnimation(ChapterContentActivity.this, R.anim.fade_in));
                     setUI(false, true);
                 }
-                setTitle(getIntent().getStringExtra("chapter_name") + ": " + getIntent().getStringExtra("chapter_title"));
+                // Không cần đặt tiêu đề ở đây nữa vì đã đặt trong onCreate
             }
 
             @Override

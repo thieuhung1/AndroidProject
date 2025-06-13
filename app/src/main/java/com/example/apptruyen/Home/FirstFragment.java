@@ -2,6 +2,8 @@ package com.example.apptruyen.Home;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -11,6 +13,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,6 +46,7 @@ public class FirstFragment extends Fragment {
     private static final String COMICS_JSON_FILE = "comics.json";
     private static final String FIRESTORE_COLLECTION = "comics";
     private static final int DISPLAY_LIMIT = 10;
+    private static final String KEY_IS_SHOWING_ALL = "isShowingAll";
 
     private ComicAdapter adapter;
     private final List<Comic> comicList = new ArrayList<>();
@@ -50,6 +54,8 @@ public class FirstFragment extends Fragment {
     private FirebaseFirestore db;
     private boolean isShowingAll = false;
     private EditText searchEditText;
+    private TextView seeAllButton;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -66,15 +72,36 @@ public class FirstFragment extends Fragment {
         progressBar = view.findViewById(R.id.progressBar);
         setupRecyclerView(view);
         setupSearch(view);
+        seeAllButton = view.findViewById(R.id.seeAllNewUpdates);
         setupSeeAllButton(view);
         loadComics();
         return view;
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            isShowingAll = savedInstanceState.getBoolean(KEY_IS_SHOWING_ALL, false);
+        }
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        updateSeeAllButtonText();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_IS_SHOWING_ALL, isShowingAll);
+    }
+
     private void setupRecyclerView(View view) {
         RecyclerView recyclerView = view.findViewById(R.id.newUpdatesRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setHasFixedSize(true); // Optimize for fixed-size items
+        recyclerView.setHasFixedSize(true);
         adapter = new ComicAdapter(getContext(), filteredComicList);
         recyclerView.setAdapter(adapter);
     }
@@ -82,7 +109,7 @@ public class FirstFragment extends Fragment {
     private void setupSearch(View view) {
         searchEditText = view.findViewById(R.id.searchEditText);
         searchEditText.addTextChangedListener(new TextWatcher() {
-            private final Runnable searchRunnable = () -> filterComics(searchEditText.getText().toString());
+            private final Runnable searchRunnable = () -> filterComicsInBackground(searchEditText.getText().toString());
             private final android.os.Handler handler = new android.os.Handler();
 
             @Override
@@ -98,28 +125,42 @@ public class FirstFragment extends Fragment {
     }
 
     private void setupSeeAllButton(View view) {
-        TextView seeAllButton = view.findViewById(R.id.seeAllNewUpdates);
         seeAllButton.setOnClickListener(v -> {
             isShowingAll = !isShowingAll;
-            filterComics(searchEditText.getText().toString());
-            seeAllButton.setText(isShowingAll ? "Thu gọn" : "Xem tất cả");
+            updateSeeAllButtonText();
+            filterComicsInBackground(searchEditText.getText().toString());
         });
     }
 
-    private void filterComics(String query) {
-        filteredComicList.clear();
-        List<Comic> tempList = query.isEmpty() ? new ArrayList<>(comicList) :
-                comicList.stream()
-                        .filter(c -> c.name.toLowerCase().contains(query.toLowerCase()) ||
-                                c.origin_name.toLowerCase().contains(query.toLowerCase()) ||
-                                c.category.stream().anyMatch(cat -> cat.toLowerCase().contains(query.toLowerCase())))
-                        .collect(Collectors.toList());
-        filteredComicList.addAll(isShowingAll ? tempList :
-                tempList.subList(0, Math.min(DISPLAY_LIMIT, tempList.size())));
-        adapter.notifyDataSetChanged();
-        if (!query.isEmpty() && filteredComicList.isEmpty()) {
-            Utility.showToast(getContext(), "Không tìm thấy truyện");
+    private void updateSeeAllButtonText() {
+        if (seeAllButton != null) {
+            seeAllButton.setText(isShowingAll ? "Thu gọn" : "Xem tất cả");
         }
+    }
+
+    private void filterComicsInBackground(String query) {
+        showProgress(true);
+        new Thread(() -> {
+            List<Comic> tempList = query.isEmpty() ? new ArrayList<>(comicList) :
+                    comicList.stream()
+                            .filter(c -> c.name.toLowerCase().contains(query.toLowerCase()) ||
+                                    c.origin_name.toLowerCase().contains(query.toLowerCase()) ||
+                                    c.category.stream().anyMatch(cat -> cat.toLowerCase().contains(query.toLowerCase())))
+                            .collect(Collectors.toList());
+
+            final List<Comic> finalList = isShowingAll ? tempList :
+                    tempList.subList(0, Math.min(DISPLAY_LIMIT, tempList.size()));
+
+            mainHandler.post(() -> {
+                filteredComicList.clear();
+                filteredComicList.addAll(finalList);
+                adapter.notifyDataSetChanged();
+                showProgress(false);
+                if (!query.isEmpty() && filteredComicList.isEmpty()) {
+                    Utility.showToast(getContext(), "Không tìm thấy truyện");
+                }
+            });
+        }).start();
     }
 
     private void loadComics() {
@@ -144,7 +185,7 @@ public class FirstFragment extends Fragment {
                 is.close();
                 parseJsonData(items);
                 requireActivity().runOnUiThread(() -> {
-                    filterComics("");
+                    filterComicsInBackground("");
                     uploadToFirestore();
                     showProgress(false);
                 });
@@ -233,7 +274,7 @@ public class FirstFragment extends Fragment {
             }
             comicList.add(comic);
         }
-        filterComics("");
+        filterComicsInBackground("");
     }
 
     private void showProgress(boolean show) {
