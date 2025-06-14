@@ -13,7 +13,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +27,7 @@ import com.example.apptruyen.util.Utility;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -199,22 +199,51 @@ public class FirstFragment extends Fragment {
     }
 
     private void uploadToFirestore() {
-        if (comicList.isEmpty()) return;
-        db.collection(FIRESTORE_COLLECTION).get().addOnCompleteListener(task -> {
-            if (!task.isSuccessful()) return;
-            List<String> existingIds = task.getResult().getDocuments().stream()
-                    .map(doc -> doc.getId()).collect(Collectors.toList());
-            int uploadCount = 0;
-            for (Comic comic : comicList) {
-                if (!existingIds.contains(comic._id)) {
-                    db.collection(FIRESTORE_COLLECTION).document(comic._id).set(comic);
-                    uploadCount++;
-                }
-            }
-            if (uploadCount > 0) {
-                Utility.showToast(getContext(), "Đã đẩy " + uploadCount + " truyện");
-            }
-        });
+        if (comicList.isEmpty()) {
+            Utility.showToast(getContext(), "Danh sách truyện rỗng");
+            return;
+        }
+
+        showProgress(true);
+        db.collection(FIRESTORE_COLLECTION).get()
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        showProgress(false);
+                        Utility.showToast(getContext(), "Lỗi kiểm tra Firestore");
+                        return;
+                    }
+
+                    List<String> existingIds = new ArrayList<>();
+                    for (QueryDocumentSnapshot doc : task.getResult()) {
+                        existingIds.add(doc.getId());
+                    }
+
+                    WriteBatch batch = db.batch();
+                    final int uploadCount = (int) comicList.stream()
+                            .filter(comic -> !existingIds.contains(comic._id))
+                            .map(comic -> batch.set(db.collection(FIRESTORE_COLLECTION).document(comic._id), comic))
+                            .count();
+
+                    if (uploadCount == 0) {
+                        showProgress(false);
+                        Utility.showToast(getContext(), "Không có truyện mới");
+                        return;
+                    }
+
+                    batch.commit()
+                            .addOnSuccessListener(aVoid -> {
+                                showProgress(false);
+                                Utility.showToast(getContext(), "Đã đẩy " + uploadCount + " truyện");
+                            })
+                            .addOnFailureListener(e -> {
+                                showProgress(false);
+                                Utility.showToast(getContext(), "Lỗi đẩy dữ liệu: " + e.getMessage());
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    showProgress(false);
+                    Utility.showToast(getContext(), "Lỗi truy vấn Firestore: " + e.getMessage());
+                });
     }
 
     private void parseJsonData(JSONArray items) throws Exception {
@@ -234,7 +263,7 @@ public class FirstFragment extends Fragment {
             for (int j = 0; j < cats.length(); j++) {
                 comic.category.add(cats.getJSONObject(j).getString("name"));
             }
-            if (obj.has("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
+            if (obj.has("chaptersLatest") && !obj.isNull("chaptersLatest") && obj.getJSONArray("chaptersLatest").length() > 0) {
                 JSONObject chapObj = obj.getJSONArray("chaptersLatest").getJSONObject(0);
                 Comic.Chapter chap = new Comic.Chapter();
                 chap.filename = chapObj.optString("filename");
