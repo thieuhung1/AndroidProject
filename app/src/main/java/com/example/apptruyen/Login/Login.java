@@ -10,6 +10,7 @@ import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -25,6 +26,7 @@ public class Login extends AppCompatActivity {
     private EditText emailEditText, passwordEditText;
     private ImageView eyeToggle;
     private Button loginButton;
+    private TextView forgotPasswordTextView;
     private boolean passwordVisible;
     private FirebaseFirestore db;
 
@@ -48,6 +50,11 @@ public class Login extends AppCompatActivity {
         findViewById(R.id.signupButton).setOnClickListener(v ->
                 startActivity(new Intent(this, register.class)));
         loginButton.setOnClickListener(v -> attemptLogin());
+
+        // Thêm xử lý click cho "Quên mật khẩu"
+        forgotPasswordTextView.setOnClickListener(v -> {
+            startActivity(new Intent(this, ForgotPasswordActivity.class));
+        });
     }
 
     // Khởi tạo view
@@ -56,6 +63,7 @@ public class Login extends AppCompatActivity {
         passwordEditText = findViewById(R.id.passwordEditText);
         eyeToggle = findViewById(R.id.eyeopen);
         loginButton = findViewById(R.id.loginButton);
+        forgotPasswordTextView = findViewById(R.id.forgotPasswordTextView);
     }
 
     // Chuyển đổi hiển thị mật khẩu

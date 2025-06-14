@@ -45,6 +45,7 @@ public class FirstFragment extends Fragment {
     private static final String TAG = "FirstFragment";
     private static final String COMICS_JSON_FILE = "comics.json";
     private static final String FIRESTORE_COLLECTION = "comics";
+    private static final String CACHE_FILE_NAME = "comic1.json";
     private static final int DISPLAY_LIMIT = 10;
     private static final String KEY_IS_SHOWING_ALL = "isShowingAll";
 
@@ -112,14 +113,11 @@ public class FirstFragment extends Fragment {
             private final Runnable searchRunnable = () -> filterComicsInBackground(searchEditText.getText().toString());
             private final android.os.Handler handler = new android.os.Handler();
 
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-            @Override
-            public void afterTextChanged(Editable s) {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override public void afterTextChanged(Editable s) {
                 handler.removeCallbacks(searchRunnable);
-                handler.postDelayed(searchRunnable, 300); // Debounce search
+                handler.postDelayed(searchRunnable, 300); // debounce
             }
         });
     }
@@ -165,6 +163,23 @@ public class FirstFragment extends Fragment {
 
     private void loadComics() {
         showProgress(true);
+
+        // Nếu có cache → load trước
+        String cachedJson = loadCacheFromFile();
+        if (cachedJson != null) {
+            try {
+                JSONArray items = new JSONObject(cachedJson)
+                        .getJSONObject("data").getJSONArray("items");
+                parseJsonData(items);
+                filterComicsInBackground("");
+                showProgress(false);
+                return;
+            } catch (Exception e) {
+                e.printStackTrace(); // Cache lỗi → fallback
+            }
+        }
+
+        // Không có cache → load từ Firestore
         db.collection(FIRESTORE_COLLECTION).get().addOnCompleteListener(task -> {
             showProgress(false);
             if (task.isSuccessful() && !task.getResult().isEmpty()) {
@@ -180,10 +195,16 @@ public class FirstFragment extends Fragment {
         new Thread(() -> {
             try {
                 InputStream is = requireContext().getAssets().open(COMICS_JSON_FILE);
-                JSONArray items = new JSONObject(new String(is.readAllBytes(), StandardCharsets.UTF_8))
-                        .getJSONObject("data").getJSONArray("items");
+                String json = new String(is.readAllBytes(), StandardCharsets.UTF_8);
                 is.close();
+
+                JSONArray items = new JSONObject(json)
+                        .getJSONObject("data").getJSONArray("items");
                 parseJsonData(items);
+
+                // Lưu cache sau khi parse
+                saveCacheToFile(json);
+
                 requireActivity().runOnUiThread(() -> {
                     filterComicsInBackground("");
                     uploadToFirestore();
@@ -274,6 +295,9 @@ public class FirstFragment extends Fragment {
             }
             comicList.add(comic);
         }
+        // Lưu cache sau khi parse JSON thành công
+        String json = new JSONObject().put("data", new JSONObject().put("items", items)).toString();
+        saveCacheToFile(json);
     }
 
     private void parseFirestoreData(Iterable<QueryDocumentSnapshot> documents) {
@@ -309,5 +333,27 @@ public class FirstFragment extends Fragment {
     private void showProgress(boolean show) {
         progressOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
         progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    private void saveCacheToFile(String json) {
+        try {
+            requireContext().openFileOutput(CACHE_FILE_NAME, Context.MODE_PRIVATE)
+                    .write(json.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Nullable
+    private String loadCacheFromFile() {
+        try {
+            InputStream is = requireContext().openFileInput(CACHE_FILE_NAME);
+            byte[] buffer = new byte[is.available()];
+            is.read(buffer);
+            is.close();
+            return new String(buffer, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
