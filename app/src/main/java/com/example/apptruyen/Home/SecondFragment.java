@@ -24,7 +24,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 public class SecondFragment extends Fragment {
     private static final String TAG = "SecondFragment";
 
-    private AppCompatButton btnLogout, btnEditProfile;
+    private AppCompatButton btnLogout, btnEditProfile,btnChangePassword;
     private TextView tvUserName, tvUserEmail;
     private ImageView ivProfilePicture;
     private FirebaseFirestore db;
@@ -38,6 +38,7 @@ public class SecondFragment extends Fragment {
         // Initialize views
         btnLogout = view.findViewById(R.id.btnLogout);
         btnEditProfile = view.findViewById(R.id.btnEditProfile);
+        btnChangePassword = view.findViewById(R.id.btnChangepass);
         tvUserName = view.findViewById(R.id.tvUserName);
         tvUserEmail = view.findViewById(R.id.tvUserEmail);
         ivProfilePicture = view.findViewById(R.id.ivAvatar);
@@ -56,6 +57,10 @@ public class SecondFragment extends Fragment {
 
         // Set click listeners
         btnLogout.setOnClickListener(v -> showLogoutConfirmation());
+        btnChangePassword.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ChangePasswordActivity.class);
+            startActivity(intent);
+        });
         btnEditProfile.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), EditAccountActivity.class);
             startActivity(intent);

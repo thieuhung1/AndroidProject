@@ -100,7 +100,7 @@
                     android:textAlignment="viewStart" />
 
                 <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btnNotifications"
+                    android:id="@+id/btnChangepass"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginHorizontal="32dp"
@@ -109,7 +109,7 @@
                     android:drawableStart="@drawable/ic_4"
                     android:drawablePadding="20dp"
                     android:paddingStart="20dp"
-                    android:text="Thông báo"
+                    android:text="sửa mật khẩu"
                     android:textAlignment="viewStart" />
 
                 <androidx.appcompat.widget.AppCompatButton
